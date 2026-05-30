@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TOURIST
+  GUIDE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  role      Role      @default(TOURIST)
+  bookings  Booking[] @relation("TouristBookings")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Landmark {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  tagline         String
+  description     String
+  latitude        Float
+  longitude       Float
+  imageGallery    String[] // PostgreSQL string array
+  mainImage       String
+  altitude        String
+  bestTimeToVisit String
+  entranceFee     String
+  weather         String
+  rating          Float    @default(5.0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Guide {
+  id                   String    @id @default(uuid())
+  name                 String
+  avatar               String
+  bio                  String
+  experienceLevel      String
+  languages            String[]
+  pricePerHour         Float
+  availabilityCalendar String[]
+  tags                 String[]
+  rating               Float     @default(5.0)
+  reviewCount          Int       @default(0)
+  location             String
+  isActiveNow          Boolean   @default(true)
+  bookings             Booking[] @relation("GuideBookings")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  touristId    String
+  touristName  String
+  touristEmail String
+  tourist      User          @relation("TouristBookings", fields: [touristId], references: [id])
+  guideId      String
+  guideName    String
+  guide        Guide         @relation("GuideBookings", fields: [guideId], references: [id])
+  bookingDate  String
+  status       BookingStatus @default(PENDING)
+  hours        Int           @default(4)
+  totalPrice   Float
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}

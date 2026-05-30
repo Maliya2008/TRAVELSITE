@@ -1,0 +1,6 @@
+{
+  "name": "ceylonta",
+  "description": "An immersive luxury tourism platform for Sri Lanka featuring cinematic animations, scenic galleries, private tour guide marketplaces, dark custom-styled maps, and an AI Travel Companion.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

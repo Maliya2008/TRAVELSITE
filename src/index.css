@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  
+  --color-jungle: #064E3B;
+  --color-golden: #F59E0B;
+  --color-midnight: #020617;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  --app-bg: #020617;
+  --app-text: #f1f5f9;
+  --app-text-strong: #ffffff;
+  --app-text-muted: #94a3b8;
+  --app-card-bg: rgba(255, 255, 255, 0.04);
+  --app-card-border: rgba(255, 255, 255, 0.08);
+  --app-glass-bg: rgba(255, 255, 255, 0.05);
+  --app-glass-border: rgba(255, 255, 255, 0.1);
+  --app-deep-bg: #020617;
+  --app-navbar-bg: rgba(2, 6, 23, 0.6);
+  --app-footer-bg: rgba(2, 6, 23, 0.9);
+  --app-pill-bg: rgba(255, 255, 255, 0.05);
+  --app-pill-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Elegant Royal Ivory Cream light theme definition */
+html.light {
+  --app-bg: #FAF8F2;
+  --app-text: #1E293B;
+  --app-text-strong: #0F172A;
+  --app-text-muted: #475569;
+  --app-card-bg: rgba(15, 23, 42, 0.03);
+  --app-card-border: rgba(15, 23, 42, 0.08);
+  --app-glass-bg: rgba(255, 255, 255, 0.6);
+  --app-glass-border: rgba(15, 23, 42, 0.1);
+  --app-deep-bg: #F4EFEB;
+  --app-navbar-bg: rgba(250, 248, 242, 0.8);
+  --app-footer-bg: #ECE6E0;
+  --app-pill-bg: rgba(15, 23, 42, 0.05);
+  --app-pill-border: rgba(15, 23, 42, 0.12);
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  
+  --color-jungle: #064E3B;
+  --color-golden: #F59E0B;
+  --color-midnight: var(--app-deep-bg);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dynamic theme mappings for existing Tailwind structures */
+html.light .text-white {
+  color: var(--app-text-strong) !important;
+}
+html.light .text-slate-100 {
+  color: var(--app-text-strong) !important;
+}
+html.light .text-slate-300 {
+  color: var(--app-text) !important;
+}
+html.light .text-slate-400 {
+  color: var(--app-text-muted) !important;
+}
+html.light .text-slate-500 {
+  color: var(--app-text-muted) !important;
+}
+html.light .bg-slate-900 {
+  background-color: var(--app-deep-bg) !important;
+}
+html.light .bg-slate-950 {
+  background-color: #ECE6E0 !important;
+}
+html.light .bg-slate-950\/20 {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+html.light .bg-slate-950\/80 {
+  background-color: rgba(255, 248, 240, 0.9) !important;
+}
+html.light .bg-midnight {
+  background-color: var(--app-bg) !important;
+}
+html.light .bg-midnight\/60 {
+  background-color: var(--app-navbar-bg) !important;
+}
+html.light .bg-midnight\/90 {
+  background-color: var(--app-footer-bg) !important;
+}
+html.light .border-white\/5 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+html.light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+html.light .hover:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+html.light .bg-white\/5 {
+  background-color: var(--app-pill-bg) !important;
+  border-color: var(--app-pill-border) !important;
+}
+html.light input, html.light select {
+  color: var(--app-text-strong) !important;
+  background-color: var(--app-glass-bg) !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+html.light input::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Glassmorphism utility classes */
+.glass-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--app-glass-bg);
+  border: 1px solid var(--app-glass-border);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 10px 30px -15px rgba(245, 158, 11, 0.15);
+}
+
+html.light .glass-card-hover:hover {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 10px 30px -15px rgba(6, 78, 59, 0.15);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--app-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #064E3B;
+}
+
+/* Animated Glows */
+.glow-green {
+  box-shadow: 0 0 40px -5px rgba(6, 78, 59, 0.3);
+}
+
+.glow-gold {
+  box-shadow: 0 0 40px -5px rgba(245, 158, 11, 0.2);
+}
