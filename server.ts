@@ -64,7 +64,11 @@ let dbSettings = {
   footerHeightClass: "py-16",
   footerCopyright: "© 2026 CEYLONTA. ALL RIGHTS SECURED BY ROYAL COVENANT.",
   theme: "dark" as "dark" | "light",
-  allowFadingAnimations: true
+  allowFadingAnimations: true,
+  scenicWondersBgImage: "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?q=80&w=1600&auto=format&fit=crop",
+  scenicWondersBgFilter: "brightness-30 blur-[2px]",
+  curatorMarketplaceBgImage: "https://images.unsplash.com/photo-1563212885-3bc67b36f7da?q=80&w=1600&auto=format&fit=crop",
+  curatorMarketplaceBgFilter: "brightness-25 blur-[2px]"
 };
 
 // Latency tracking middleware to measure api speed

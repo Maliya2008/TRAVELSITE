@@ -32,7 +32,7 @@ export default function GuideCard({ guide, onRent }: GuideCardProps) {
         <div className="flex items-start justify-between mb-4">
           <div className="relative">
             <img
-              src={guide.avatar}
+              src={guide.avatar || undefined}
               alt={guide.name}
               referrerPolicy="no-referrer"
               className="w-16 h-16 rounded-2xl object-cover border-2 border-white/10 group-hover:border-golden/40 transition-colors"
@@ -178,14 +178,14 @@ export default function GuideCard({ guide, onRent }: GuideCardProps) {
                   <Camera className="w-3 h-3 text-golden" /> Expedition snaps gallery
                 </span>
                 <div className="grid grid-cols-2 gap-1.5 pt-1">
-                  {guide.portfolioGallery.slice(0, 2).map((g, i) => (
+                  {guide.portfolioGallery.slice(0, 2).map((g, i) => g ? (
                     <img
                       key={i}
-                      src={g}
+                      src={g || undefined}
                       alt="Expedition snap"
                       className="w-full h-16 object-cover rounded-md border border-white/5 hover:border-golden/40 transition-all pointer-events-none"
                     />
-                  ))}
+                  ) : null)}
                 </div>
               </div>
             )}

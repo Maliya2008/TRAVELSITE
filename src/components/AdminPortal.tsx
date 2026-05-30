@@ -82,6 +82,34 @@ export default function AdminPortal({
   const [guideGear, setGuideGear] = useState("Safety GPS locator, Emergency shelter");
   const [guidePortfolioGallery, setGuidePortfolioGallery] = useState("");
 
+  const [heroHoverImage, setHeroHoverImage] = useState<string>("");
+
+  useEffect(() => {
+    const val = localStorage.getItem("ceylonta_hero_hover_image") || "";
+    setHeroHoverImage(val);
+  }, []);
+
+  const handleHeroHoverImageChange = (newVal: string) => {
+    setHeroHoverImage(newVal);
+    if (newVal) {
+      localStorage.setItem("ceylonta_hero_hover_image", newVal);
+    } else {
+      localStorage.removeItem("ceylonta_hero_hover_image");
+    }
+    window.dispatchEvent(new Event("ceylonta_hover_image_updated"));
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      handleHeroHoverImageChange(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Load webhook logs on mount/auth success and tab transition
   useEffect(() => {
     // Session token check
@@ -594,6 +622,178 @@ export default function AdminPortal({
                   </div>
                 </div>
 
+                {/* 2. SECTOR: SECTION BACKDROPS AND LOCAL STORAGE UPLOAD */}
+                <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl space-y-6">
+                  <div className="border-b border-white/5 pb-3">
+                    <span className="text-xs uppercase tracking-widest text-golden font-mono font-bold">
+                      Premium Section Ambient Backdrops & Uploads
+                    </span>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Configure dynamic visual backdrops, customizable filter effects, and local storage asset uploads.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    {/* Local Storage Anime.js Hero Hover Image Upload */}
+                    <div className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-4">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold block mb-1">
+                          Hero Hover Image (anime.js Card)
+                        </span>
+                        <p className="text-[10px] text-slate-400">
+                          This image triggers a 3D responsive interactive float on hover inside the main Hero section.
+                        </p>
+                      </div>
+
+                      {/* File select uploader representing local storage persistence */}
+                      <div className="space-y-3">
+                        <div className="p-4 border border-dashed border-white/10 rounded-xl text-center bg-slate-900/50 hover:bg-slate-900 transition-all cursor-pointer relative group">
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleFileUpload}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          />
+                          <span className="text-[10px] uppercase font-mono text-golden block font-bold transition-transform group-hover:scale-105">
+                            Upload Local File (Base64)
+                          </span>
+                          <span className="text-[9px] text-slate-500 block mt-1">
+                            Drag & drop or click to choose
+                          </span>
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Or Paste Image URL</label>
+                          <input 
+                            type="text"
+                            value={heroHoverImage && heroHoverImage.startsWith("data:") ? "[Uploaded base64 asset]" : heroHoverImage}
+                            onChange={(e) => handleHeroHoverImageChange(e.target.value)}
+                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
+                            placeholder="https://images.unsplash.com/..."
+                          />
+                        </div>
+
+                        {heroHoverImage && (
+                          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                            <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
+                              ● COMMITTED TO LOCAL STORAGE
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleHeroHoverImageChange("")}
+                              className="text-[9px] font-mono text-red-400 hover:text-red-300 hover:underline"
+                            >
+                              Reset to Default
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Scenic Wonders Shaded Background and Filter Effect */}
+                    <div className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-4">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold block mb-1">
+                          Scenic Wonders Backdrop
+                        </span>
+                        <p className="text-[10px] text-slate-400">
+                          Set the background image and dynamic shaded filter effect applied underneath the landmarks section.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Backdrop Image URL</label>
+                          <input 
+                            type="text"
+                            value={settings.scenicWondersBgImage || ""}
+                            onChange={(e) => saveSettings({ ...settings, scenicWondersBgImage: e.target.value })}
+                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
+                            placeholder="https://images.unsplash.com/..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Atmospheric Effect Presets</label>
+                          <select 
+                            value={settings.scenicWondersBgFilter || "brightness-30 blur-[2px]"}
+                            onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
+                            className="w-full bg-slate-900 border border-white/5 text-slate-300 text-xs rounded-lg p-2 focus:outline-none"
+                          >
+                            <option value="brightness-30 blur-[2px]">Classic Deep Shaded (Dark & Blurred)</option>
+                            <option value="brightness-[0.22] saturate-[1.3] hue-rotate-15 blur-[1px]">Forest Mystique (High Saturation Emerald)</option>
+                            <option value="brightness-[0.18] contrast-125 sepia blur-sm">Ancient Scroll (Historical Sepia Tone)</option>
+                            <option value="brightness-20 grayscale blur-[2px]">Gothic Monumental (High Contrast Slate)</option>
+                            <option value="brightness-100 blur-0">Raw Image (No Shading Overlay)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Raw CSS Filter Classes</label>
+                          <input 
+                            type="text"
+                            value={settings.scenicWondersBgFilter || ""}
+                            onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
+                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-emerald-400 focus:outline-none focus:border-golden"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Curators Marketplace Shaded Background and Filter Effect */}
+                    <div className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-4">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold block mb-1">
+                          Curators Marketplace Backdrop
+                        </span>
+                        <p className="text-[10px] text-slate-400">
+                          Customize the shaded background image and ambient effects rendered beneath the guide curators list.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Backdrop Image URL</label>
+                          <input 
+                            type="text"
+                            value={settings.curatorMarketplaceBgImage || ""}
+                            onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgImage: e.target.value })}
+                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
+                            placeholder="https://images.unsplash.com/..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Atmospheric Effect Presets</label>
+                          <select 
+                            value={settings.curatorMarketplaceBgFilter || "brightness-25 blur-[2px]"}
+                            onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
+                            className="w-full bg-slate-900 border border-white/5 text-slate-300 text-xs rounded-lg p-2 focus:outline-none"
+                          >
+                            <option value="brightness-25 blur-[2px]">Classic Deep Shaded (Dark & Blurred)</option>
+                            <option value="brightness-20 saturate-[1.3] contrast-125 blur-[1px]">Ocean Blue (Rich Contrast Marine)</option>
+                            <option value="brightness-[0.15] sepia-[0.35] saturate-150 blur-sm">Warm Amber Safari (Sun-kissed Savanna)</option>
+                            <option value="brightness-15 grayscale blur-[2px]">Gravel Ash (Monochrome Slate)</option>
+                            <option value="brightness-100 blur-0">Raw Image (No Shading Overlay)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Raw CSS Filter Classes</label>
+                          <input 
+                            type="text"
+                            value={settings.curatorMarketplaceBgFilter || ""}
+                            onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
+                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-emerald-400 focus:outline-none focus:border-golden"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
                 {/* Section Arrange and Footer Settings */}
                 <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl lg:col-span-2 space-y-4">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 block border-b border-white/5 pb-2 font-bold">
@@ -707,7 +907,7 @@ export default function AdminPortal({
                       <div key={landmark.id} className="flex items-center justify-between pt-3">
                         <div className="flex items-center gap-3">
                           <img 
-                            src={landmark.mainImage} 
+                            src={landmark.mainImage || undefined} 
                             alt={landmark.name} 
                             className="w-10 h-10 rounded-xl object-cover border border-white/15 shrink-0" 
                           />
@@ -881,7 +1081,7 @@ export default function AdminPortal({
                       <div key={g.id} className="flex items-center justify-between pt-3">
                         <div className="flex items-center gap-3">
                           <img 
-                            src={g.avatar} 
+                            src={g.avatar || undefined} 
                             alt={g.name} 
                             className="w-10 h-10 rounded-full object-cover border border-white/15 shrink-0" 
                           />

@@ -165,7 +165,7 @@ export default function BookingSlider({ isOpen, onClose, guide, onBookingSuccess
                   {/* Selected Guide summary card */}
                   <div className="p-4 rounded-xl bg-slate-950 border border-white/5 flex gap-4 items-center">
                     <img
-                      src={guide.avatar}
+                      src={guide.avatar || undefined}
                       alt={guide.name}
                       className="w-12 h-12 rounded-lg object-cover border-2 border-white/10"
                     />

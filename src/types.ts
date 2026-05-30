@@ -73,6 +73,10 @@ export interface SiteSettings {
   footerCopyright: string;
   theme: "dark" | "light";
   allowFadingAnimations: boolean;
+  scenicWondersBgImage?: string;
+  scenicWondersBgFilter?: string; // e.g. "brightness-50 blur-sm" etc.
+  curatorMarketplaceBgImage?: string;
+  curatorMarketplaceBgFilter?: string;
 }
 
 export enum BookingStatus {

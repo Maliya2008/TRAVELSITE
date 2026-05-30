@@ -26,7 +26,11 @@ const defaultSettings: SiteSettings = {
   footerHeightClass: "py-16",
   footerCopyright: "© 2026 CEYLONTA. ALL RIGHTS SECURED BY ROYAL COVENANT.",
   theme: "dark",
-  allowFadingAnimations: true
+  allowFadingAnimations: true,
+  scenicWondersBgImage: "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?q=80&w=1600&auto=format&fit=crop",
+  scenicWondersBgFilter: "brightness-30 blur-[2px]",
+  curatorMarketplaceBgImage: "https://images.unsplash.com/photo-1563212885-3bc67b36f7da?q=80&w=1600&auto=format&fit=crop",
+  curatorMarketplaceBgFilter: "brightness-25 blur-[2px]"
 };
 
 export default function App() {
@@ -233,9 +237,33 @@ export default function App() {
           
           // Case A: Landmark Carousel Section
           if (sectionId === "landmarks-explore") {
+            const bgImage = settings.scenicWondersBgImage || defaultSettings.scenicWondersBgImage;
+            const filterClass = settings.scenicWondersBgFilter || defaultSettings.scenicWondersBgFilter;
             return (
-              <section key={sectionId} id="landmarks-explore" className="space-y-8 text-left scroll-mt-24">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <section 
+                key={sectionId} 
+                id="landmarks-explore" 
+                className="space-y-8 text-left scroll-mt-24 relative p-6 md:p-10 rounded-3xl border border-white/5 overflow-hidden group/scenic"
+              >
+                {/* Background Shaded Image Layer with dynamic effects */}
+                {bgImage && (
+                  <div className="absolute inset-0 -z-20 w-full h-full overflow-hidden">
+                    <img 
+                      src={bgImage} 
+                      alt="Scenic Wonders Ambient Backdrop" 
+                      referrerPolicy="no-referrer"
+                      className={`w-full h-full object-cover transition-all duration-700 ${filterClass}`}
+                    />
+                    {/* Shadow Layer overlay representing high-end aesthetic styling */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-slate-950/90" />
+                  </div>
+                )}
+
+                {/* Visual Accent */}
+                <div className="absolute top-0 left-0 w-2 h-16 bg-gradient-to-b from-golden to-transparent rounded-r" />
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
                   <div>
                     <span className="text-xs uppercase tracking-widest text-golden font-mono font-semibold flex items-center gap-1.5 mb-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-golden" /> Majestic Havens of Ceylon
@@ -249,7 +277,7 @@ export default function App() {
                   </div>
                   
                   {selectedLandmark && (
-                    <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 font-mono text-[10px] text-slate-400">
+                    <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 font-mono text-[10px] text-slate-400 backdrop-blur-md">
                       <Compass className="w-3.5 h-3.5 text-golden" />
                       <span>Inspecting:</span>
                       <span className="text-white font-bold">{selectedLandmark.name}</span>
@@ -257,7 +285,7 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
                   {landmarks.map((l) => (
                     <LandmarkCard
                       key={l.id}
@@ -287,9 +315,33 @@ export default function App() {
 
           // Case C: Tour Guide Curators Marketplace list
           if (sectionId === "guides-marketplace") {
+            const bgImage = settings.curatorMarketplaceBgImage || defaultSettings.curatorMarketplaceBgImage;
+            const filterClass = settings.curatorMarketplaceBgFilter || defaultSettings.curatorMarketplaceBgFilter;
             return (
-              <section key={sectionId} id="guides-marketplace" className="space-y-8 text-left scroll-mt-24">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6">
+              <section 
+                key={sectionId} 
+                id="guides-marketplace" 
+                className="space-y-8 text-left scroll-mt-24 relative p-6 md:p-10 rounded-3xl border border-white/5 overflow-hidden group/curator"
+              >
+                {/* Background Shaded Image Layer with dynamic effects */}
+                {bgImage && (
+                  <div className="absolute inset-0 -z-20 w-full h-full overflow-hidden">
+                    <img 
+                      src={bgImage} 
+                      alt="Curators Marketplace Ambient Backdrop" 
+                      referrerPolicy="no-referrer"
+                      className={`w-full h-full object-cover transition-all duration-700 ${filterClass}`}
+                    />
+                    {/* Shadow Layer overlay representing high-end aesthetic styling */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-slate-950/90" />
+                  </div>
+                )}
+
+                {/* Visual Accent */}
+                <div className="absolute top-0 right-0 w-2 h-16 bg-gradient-to-b from-emerald-500 to-transparent rounded-l" />
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6 relative z-10">
                   <div>
                     <span className="text-xs uppercase tracking-widest text-golden font-mono font-semibold flex items-center gap-1.5 mb-1.5">
                       <Compass className="w-3.5 h-3.5 text-golden" /> Proximity Mapping & Expert Listings
@@ -297,19 +349,19 @@ export default function App() {
                     <h2 className="text-3xl md:text-5xl font-serif font-semibold text-white">
                       Curator <span className="italic font-light text-golden">Marketplace</span>
                     </h2>
-                    <p className="text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
+                    <p className="text-sm text-slate-405 mt-2 max-w-2xl leading-relaxed text-slate-300">
                       Connect with highly distinguished private tour specialists. Click on landmarks above or use custom localization tags below to verify precise guides matching regional parameters.
                     </p>
                   </div>
 
-                  <div className="text-xs font-mono text-slate-500 flex items-center gap-2">
-                    <span className="p-1.5 rounded bg-white/5 border border-white/10 text-golden font-bold">{guides.length} matches</span>
+                  <div className="text-xs font-mono text-slate-400 flex items-center gap-2 relative z-10">
+                    <span className="p-1.5 rounded bg-slate-950/60 border border-white/10 text-golden font-bold">{guides.length} matches</span>
                     <span>Available Specialists</span>
                   </div>
                 </div>
 
                 {/* Core filter row */}
-                <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/20 p-4 rounded-2xl border border-white/5">
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/60 backdrop-blur-md p-4 rounded-2xl border border-white/5 relative z-10">
                   <div className="flex flex-wrap items-center gap-4 flex-grow max-w-4xl">
                     
                     <div className="relative min-w-[200px] flex-grow md:flex-none">
@@ -319,12 +371,12 @@ export default function App() {
                         placeholder="Filter by city (e.g. Ella, Sigiriya...)"
                         value={locationFilter}
                         onChange={(e) => setLocationFilter(e.target.value)}
-                        className="w-full bg-slate-900 border border-white/10 focus:border-golden/40 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                        className="w-full bg-slate-900/95 border border-white/10 focus:border-golden/40 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
                       />
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 mr-1.5 hidden sm:inline">
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 mr-1.5 hidden sm:inline font-bold">
                         Specialty:
                       </span>
                       {availableSpecialistTags.map((tag) => {
@@ -336,7 +388,7 @@ export default function App() {
                             className={`text-[10px] font-mono px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
                               isActive
                                 ? "bg-golden text-midnight border-golden font-bold"
-                                : "bg-white/5 border-white/5 text-slate-400 hover:border-white/10"
+                                : "bg-slate-900/80 border-white/5 text-slate-300 hover:border-white/10"
                             }`}
                           >
                             {tag}
@@ -349,7 +401,7 @@ export default function App() {
                   {(locationFilter || selectedTagFilter) && (
                     <button
                       onClick={handleResetFilters}
-                      className="text-xs text-golden hover:text-amber-300 font-mono flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 transition-all cursor-pointer"
+                      className="text-xs text-golden hover:text-amber-300 font-mono flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/60 border border-white/10 transition-all cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-golden" />
                       <span>Reset Parameters</span>
@@ -359,7 +411,7 @@ export default function App() {
 
                 {/* Guides displaying grid */}
                 {guides.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
                     {guides.map((g) => (
                       <GuideCard
                         key={g.id}
@@ -369,7 +421,7 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-12 text-center bg-slate-950/20 border border-dashed border-white/5 rounded-2xl max-w-lg mx-auto space-y-3">
+                  <div className="p-12 text-center bg-slate-950/60 border border-dashed border-white/5 rounded-2xl max-w-lg mx-auto space-y-3 relative z-10">
                     <AlertCircle className="w-8 h-8 text-golden mx-auto animate-pulse" />
                     <h4 className="text-base font-bold text-white uppercase tracking-wide">
                       No Guides Match Filtering
