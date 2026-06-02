@@ -18,11 +18,31 @@ export default function Hero({ settings }: HeroProps) {
   const imageRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [hoverImage, setHoverImage] = useState<string>(() => {
+  const [isCardHovered, setIsCardHovered] = useState(false);
+
+  const [customImage, setCustomImage] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("ceylonta_hero_hover_image") || "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=1200&auto=format&fit=crop";
+      return localStorage.getItem("ceylonta_hero_hover_image");
     }
-    return "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=1200&auto=format&fit=crop";
+    return null;
+  });
+
+  const images = [
+    customImage,
+    settings.heroBgImage,
+    settings.heroBgImage2,
+    settings.heroBgImage3,
+    settings.heroBgImage4,
+    settings.heroBgImage5,
+  ].filter((img): img is string => typeof img === "string" && img.trim() !== "");
+
+  if (images.length === 0) {
+    images.push("https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=1600&auto=format&fit=crop");
+  }
+
+  const [hoverImage, setHoverImage] = useState<string>(() => {
+    if (customImage) return customImage;
+    return images[0] || "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=1600&auto=format&fit=crop";
   });
   
   // Track scroll position of the Hero section for the zoom and parallax effect
@@ -36,9 +56,13 @@ export default function Hero({ settings }: HeroProps) {
     const loadStoredImage = () => {
       const stored = localStorage.getItem("ceylonta_hero_hover_image");
       if (stored) {
+        setCustomImage(stored);
         setHoverImage(stored);
       } else {
-        setHoverImage("https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=1200&auto=format&fit=crop");
+        setCustomImage(null);
+        if (images && images.length > 0) {
+          setHoverImage(images[activeImageIndex] || images[0]);
+        }
       }
     };
 
@@ -50,7 +74,7 @@ export default function Hero({ settings }: HeroProps) {
       window.removeEventListener("storage", loadStoredImage);
       window.removeEventListener("ceylonta_hover_image_updated", loadStoredImage);
     };
-  }, []);
+  }, [settings, activeImageIndex]);
 
   // Continuous subtle rotating orbit ring animation underneath the image using anime.js
   useEffect(() => {
@@ -66,6 +90,7 @@ export default function Hero({ settings }: HeroProps) {
 
   // Hover 3D interactive tilt handlers using anime.js
   const handleMouseEnter = () => {
+    setIsCardHovered(true);
     if (imageRef.current) {
       animate(imageRef.current, {
         scale: 1.05,
@@ -92,6 +117,7 @@ export default function Hero({ settings }: HeroProps) {
   };
 
   const handleMouseLeave = () => {
+    setIsCardHovered(false);
     if (imageRef.current) {
       animate(imageRef.current, {
         scale: 1.0,
@@ -103,17 +129,43 @@ export default function Hero({ settings }: HeroProps) {
     }
   };
 
-  // Automatically fade between BgImage 1 and BgImage 2 every 6 seconds if BgImage 2 exists
-  useEffect(() => {
-    if (settings.heroBgImage2) {
-      const interval = setInterval(() => {
-        setActiveImageIndex((prev) => (prev === 0 ? 1 : 0));
-      }, 6000);
-      return () => clearInterval(interval);
-    } else {
-      setActiveImageIndex(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+
+  const imageCaptions = [
+    { title: "Sigiriya Ancient Citadel Heights", meta: "EXPEDITION HIGHLIGHT #01" },
+    { title: "Ella Highland Rail Passage", meta: "EXPEDITION HIGHLIGHT #02" },
+    { title: "Galle Fort Coastal Bastion", meta: "EXPEDITION HIGHLIGHT #03" },
+    { title: "Kandy Sacred Lakeside Canopy", meta: "EXPEDITION HIGHLIGHT #04" },
+    { title: "Yala Deep Jungle Expedition", meta: "EXPEDITION HIGHLIGHT #05" },
+  ];
+
+  const getCaption = (idx: number) => {
+    if (customImage && idx === 0) {
+      return { title: "Custom Curated Local Scene", meta: "UPLOADED PRIVATE HIGHLIGHT" };
     }
-  }, [settings.heroBgImage2]);
+    const offsetIdx = customImage ? idx - 1 : idx;
+    if (offsetIdx >= 0 && offsetIdx < imageCaptions.length) {
+      return imageCaptions[offsetIdx];
+    }
+    return { title: `Expedition Scene Highlight`, meta: `LOCAL TREASURE #${idx + 1}` };
+  };
+
+  // Automatically fade between available backdrop images every 10 seconds if multiple exist and autoplay is running
+  useEffect(() => {
+    if (images.length > 1 && isAutoPlay) {
+      const interval = setInterval(() => {
+        setActiveImageIndex((prev) => (prev + 1) % images.length);
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [images.length, isAutoPlay]);
+
+  // Synchronize hoverImage with the active background slide
+  useEffect(() => {
+    if (images[activeImageIndex]) {
+      setHoverImage(images[activeImageIndex]);
+    }
+  }, [activeImageIndex, settings]);
 
   // Calculate dynamic scale and translation values based on scroll progression
   const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.25]);
@@ -148,34 +200,34 @@ export default function Hero({ settings }: HeroProps) {
     }
   };
 
-  const primaryImage = settings.heroBgImage || "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=1600&auto=format&fit=crop";
-  const secondaryImage = settings.heroBgImage2 || "";
-
   return (
     <div 
       ref={containerRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 px-6 py-20 lg:py-28"
       id="hero-expedition-viewport"
     >
-      {/* Background Image 1 */}
-      <motion.div 
-        className="absolute inset-0 bg-cover bg-center -z-20 scale-[1.02] transition-opacity duration-1500"
-        style={{ 
-          backgroundImage: `url('${primaryImage}')`,
-          scale: smoothBgScale,
-          opacity: activeImageIndex === 0 ? bgOpacity : 0,
-          filter: `blur(${settings.heroBgBlur || 0}px)`
-        }}
-      />
-
-      {/* Background Image 2 (crossfading) */}
-      {secondaryImage && (
+      {/* Background Slides Dynamic Render Grid */}
+      {images.map((imgUrl, idx) => (
         <motion.div 
-          className="absolute inset-0 bg-cover bg-center -z-20 scale-[1.02] transition-opacity duration-1500"
+          key={idx}
+          className="absolute inset-0 bg-cover bg-center -z-20 scale-[1.02] transition-opacity duration-1000"
           style={{ 
-            backgroundImage: `url('${secondaryImage}')`,
+            backgroundImage: `url('${imgUrl}')`,
             scale: smoothBgScale,
-            opacity: activeImageIndex === 1 ? bgOpacity : 0,
+            opacity: activeImageIndex === idx ? bgOpacity : 0,
+            filter: `blur(${settings.heroBgBlur || 0}px)`
+          }}
+        />
+      ))}
+
+      {/* Dynamic Hover Card Background Overlay */}
+      {hoverImage && (
+        <motion.div 
+          className="absolute inset-0 bg-cover bg-center -z-18 scale-[1.02] pointer-events-none transition-opacity duration-700"
+          style={{ 
+            backgroundImage: `url('${hoverImage}')`,
+            scale: smoothBgScale,
+            opacity: isCardHovered ? bgOpacity : 0,
             filter: `blur(${settings.heroBgBlur || 0}px)`
           }}
         />
@@ -237,6 +289,77 @@ export default function Hero({ settings }: HeroProps) {
               Discover Private Curators
             </a>
           </motion.div>
+
+          {/* Drag-to-Explore Celestial Slide Control */}
+          <motion.div 
+            variants={itemVariants}
+            className="w-full max-w-md mt-4 p-4 rounded-2xl bg-slate-900/60 border border-white/10 backdrop-blur-md relative"
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span className="text-slate-400 uppercase tracking-widest flex items-center gap-1.5 font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-golden" /> DRAG TO EXPLORE CELESTIAL SCENES
+              </span>
+              <span className="text-golden font-bold uppercase">
+                Scene {activeImageIndex + 1} of {images.length}
+              </span>
+            </div>
+
+            {/* Custom Interactive Track with Click & Interactive Draggability */}
+            <div className="relative w-full h-8 flex items-center">
+              {/* Slider track underlay line */}
+              <div className="absolute left-1 right-1 h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+                {/* Visual fill track */}
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-golden rounded-full transition-all duration-300"
+                  style={{ width: `${(activeImageIndex / (images.length - 1 || 1)) * 100}%` }}
+                />
+              </div>
+
+              {/* Ticks representation on track */}
+              <div className="absolute left-1 right-1 flex justify-between px-[3px] pointer-events-none">
+                {images.map((_, idx) => (
+                  <div 
+                    key={idx}
+                    className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 ${
+                      idx <= activeImageIndex 
+                        ? "bg-golden border-white scale-110 shadow-[0_0_8px_#fa0]" 
+                        : "bg-slate-700 border-transparent scale-90"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Transparent input slider capturing natural click/drag anywhere */}
+              <input
+                type="range"
+                min="0"
+                max={images.length - 1}
+                value={activeImageIndex}
+                onChange={(e) => {
+                  setActiveImageIndex(Number(e.target.value));
+                  setIsAutoPlay(false); // Disable auto-play immediately when user manually interacts
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30"
+              />
+
+              {/* Glowing, premium circular dragging handle, perfectly synchronized with range value */}
+              <div 
+                className="absolute w-6 h-6 bg-gradient-to-br from-golden to-amber-500 rounded-full border-2 border-white shadow-2xl flex items-center justify-center pointer-events-none -translate-x-1/2 z-20 transition-all duration-300 active:scale-110 shadow-golden/30"
+                style={{ 
+                  left: `calc(4px + ${(activeImageIndex / (images.length - 1 || 1)) * 100}% - ${(activeImageIndex / (images.length - 1 || 1)) * 8}px)` 
+                }}
+              >
+                <div className="w-1.5 h-1.5 bg-slate-950 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+              </div>
+            </div>
+
+            {/* Help guidelines */}
+            <div className="flex justify-between text-[9px] font-mono text-slate-500 uppercase tracking-widest mt-1">
+              <span>01. Dawn</span>
+              <span>03. Dusk</span>
+              <span>05. Night</span>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Right Column: Responsive Anime.js Interactive Card Image Container */}
@@ -282,10 +405,10 @@ export default function Hero({ settings }: HeroProps) {
               {/* Shaded bottom caption panel */}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent p-5 pt-12 flex flex-col justify-end text-left">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold flex items-center gap-1.5">
-                  <Sparkles className="w-3" /> Live Celestial Frame
+                  <Sparkles className="w-3" /> {getCaption(activeImageIndex).meta}
                 </span>
-                <p className="text-white text-sm font-serif font-medium mt-1 leading-tight tracking-tight drop-shadow-md">
-                  Experience Ceylonta interactively.
+                <p className="text-white text-sm font-serif font-medium mt-1 leading-tight tracking-tight drop-shadow-md min-h-[40px]">
+                  {getCaption(activeImageIndex).title}
                 </p>
                 <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 mt-2.5 pt-2 border-t border-white/5">
                   <span>SYSTEM: HEURISTIC 3D TILT</span>

@@ -66,6 +66,9 @@ export interface SiteSettings {
   heroDescription: string;
   heroBgImage: string;
   heroBgImage2?: string;
+  heroBgImage3?: string;
+  heroBgImage4?: string;
+  heroBgImage5?: string;
   heroBgFadeDuration: number; // in seconds
   heroBgBlur: number; // in pixels
   sectionOrder: string[]; // e.g. ["landmarks-explore", "waypoint-map", "guides-marketplace"]

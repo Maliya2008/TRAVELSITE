@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ceylonta — Resplendent Ceylon Preview Frame</title>
+  
+  <!-- Tailwind CSS Via Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Integrations -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            jungle: '#064E3B',
+            golden: '#F59E0B',
+            midnight: '#020617',
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            serif: ["Playfair Display", "Georgia", "serif"],
+            mono: ["JetBrains Mono", "monospace"],
+            display: ["Space Grotesk", "sans-serif"],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons Library CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --app-bg: #020617;
+      --app-text: #f1f5f9;
+      --app-text-strong: #ffffff;
+      --app-text-muted: #94a3b8;
+      --app-card-bg: rgba(255, 255, 255, 0.04);
+      --app-card-border: rgba(255, 255, 255, 0.08);
+      --app-glass-bg: rgba(255, 255, 255, 0.05);
+      --app-glass-border: rgba(255, 255, 255, 0.1);
+      --app-deep-bg: #020617;
+    }
+
+    html.light {
+      --app-bg: #FAF8F2;
+      --app-text: #1E293B;
+      --app-text-strong: #0F172A;
+      --app-text-muted: #475569;
+      --app-card-bg: rgba(15, 23, 42, 0.03);
+      --app-card-border: rgba(15, 23, 42, 0.08);
+      --app-glass-bg: rgba(255, 255, 255, 0.6);
+      --app-glass-border: rgba(15, 23, 42, 0.1);
+      --app-deep-bg: #F4EFEB;
+    }
+
+    body {
+      background-color: var(--app-bg);
+      color: var(--app-text);
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* Custom scrollbar adjustments */
+    ::-webkit-scrollbar {
+      width: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--app-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #F59E0B;
+    }
+
+    .glass-card {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: var(--app-glass-bg);
+      border: 1px solid var(--app-glass-border);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+      transform: translateY(-2px);
+    }
+
+    html.light .glass-card:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .interactive-hero-img {
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1s ease;
+    }
+
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.05); }
+    }
+
+    .animate-pulse-slow {
+      animation: pulse-slow 8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-golden selection:text-slate-950">
+
+  <!-- Ambient Glow Elements -->
+  <div class="absolute top-0 left-1/4 w-[40rem] h-[40rem] bg-jungle/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse-slow"></div>
+  <div class="absolute bottom-20 right-1/4 w-[35rem] h-[35rem] bg-golden/5 rounded-full blur-[160px] pointer-events-none -z-10"></div>
+
+  <!-- Progress Scroll Header Simulator -->
+  <div id="scroll-bar" class="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-800 via-golden to-emerald-500 origin-left z-50 transition-all duration-300" style="width: 0%;"></div>
+
+  <!-- Navigation Header Frame -->
+  <header class="fixed top-0 left-0 right-0 z-45 bg-[#020617]/70 dark:bg-[#020617]/75 light:bg-[#FAF8F2]/75 backdrop-blur-md border-b border-white/5 dark:border-white/5 light:border-slate-200 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="p-2.5 rounded-xl bg-gradient-to-br from-emerald-900 to-emerald-950 border border-white/10 group-hover:border-golden/40 transition-colors duration-300">
+          <i data-lucide="compass" class="w-5 h-5 text-golden animate-spin" style="animation-duration: 25s"></i>
+        </div>
+        <div class="flex flex-col">
+          <h1 class="text-xl md:text-2xl font-serif text-white dark:text-white light:text-slate-900 font-bold tracking-widest leading-none uppercase">
+            CEYLON<span class="text-golden font-sans font-normal text-xs tracking-widest uppercase ml-0.5 inline-block font-semibold">TA</span>
+          </h1>
+          <span class="text-[9px] font-mono text-golden/80 tracking-widest uppercase leading-none mt-1">Isle Edition</span>
+        </div>
+      </a>
+
+      <!-- Horizontal Links (Visual only) -->
+      <nav class="hidden md:flex items-center gap-8 text-xs font-mono tracking-wider text-slate-300 dark:text-slate-300 light:text-slate-600">
+        <a href="#highlights" class="hover:text-golden transition-colors">Scenic Wonders</a>
+        <a href="#curators" class="hover:text-golden transition-colors">Expert Curators</a>
+        <a href="#booking-section" class="hover:text-golden transition-colors flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-golden animate-ping"></span> Live Estimator
+        </a>
+      </nav>
+
+      <!-- Action badging -->
+      <div class="flex items-center gap-3">
+        <!-- Live Curator indicator -->
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-400 font-mono font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>5 Specialists Online</span>
+        </div>
+
+        <!-- Light/Dark Toggle -->
+        <button id="theme-toggler" onclick="toggleTheme()" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-golden/40 hover:bg-white/10 text-slate-300 hover:text-white transition-all cursor-pointer" title="Adjust Ambient Filter">
+          <i id="theme-icon" data-lucide="sun" class="w-4 h-4 text-golden"></i>
+        </button>
+
+        <a href="/" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-golden hover:bg-golden/90 text-slate-950 font-medium text-xs tracking-wider uppercase transition-all shadow-md">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Live Site</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Scroll Body -->
+  <main class="pt-[88px] space-y-20 pb-20">
+
+    <!-- Hero Frame -->
+    <section class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[75vh] relative overflow-hidden">
+      <!-- Hero Text Column -->
+      <div class="lg:col-span-7 text-left space-y-6 z-10 py-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-golden/10 border border-golden/20 text-xs text-golden font-mono tracking-wide">
+          <i data-lucide="award" class="w-3.5 h-3.5"></i>
+          <span>Curated Heritage Expedition Space</span>
+        </div>
+        
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-serif text-white dark:text-white light:text-slate-900 tracking-tight leading-[1.1]">
+          Resplendent <br class="hidden sm:inline">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-golden via-amber-200 to-yellow-500">Ceylon</span> Luxury
+        </h1>
+        
+        <p class="text-base sm:text-lg text-slate-400 dark:text-slate-400 light:text-slate-600 max-w-xl font-normal leading-relaxed">
+          Embark on highly sophisticated journeys containing majestic UNESCO relics, mist-shrouded tea ravines, and pristine coastlines alongside legendary private curators showing ancient secrets.
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-wrap items-center gap-4 pt-2">
+          <a href="#curators" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-golden to-amber-500 text-slate-950 hover:shadow-xl hover:shadow-golden/10 font-medium text-xs tracking-wider uppercase transition-all font-mono">
+            Secure Private Curator
+          </a>
+          <a href="#highlights" class="px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-golden/30 hover:bg-white/10 text-white dark:text-white light:text-slate-800 font-medium text-xs tracking-wider uppercase transition-all font-mono flex items-center gap-2">
+            Explore Wonders
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-golden"></i>
+          </a>
+        </div>
+
+        <!-- Micro stats -->
+        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-white/5 dark:border-white/5 light:border-slate-200 max-w-md">
+          <div>
+            <h3 class="text-xl sm:text-2xl font-serif text-golden font-bold">4.95★</h3>
+            <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 light:text-slate-500 uppercase tracking-widest font-mono">Customer Rating</p>
+          </div>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-serif text-white dark:text-white light:text-slate-900 font-bold">4</h3>
+            <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 light:text-slate-500 uppercase tracking-widest font-mono">UNESCO Wonders</p>
+          </div>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-serif text-white dark:text-white light:text-slate-900 font-bold">5</h3>
+            <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 light:text-slate-500 uppercase tracking-widest font-mono">Lead Specialists</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Curved Images Carousel Panel -->
+      <div class="lg:col-span-5 text-center relative flex justify-center items-center">
+        <!-- Interactive Circle Decor -->
+        <div class="absolute -inset-4 rounded-full border border-golden/10 animate-spin" style="animation-duration: 40s;"></div>
+        
+        <div class="w-full max-w-[420px] aspect-[4/5] rounded-3xl overflow-hidden bg-slate-950 border border-white/10 dark:border-white/10 light:border-slate-300 relative group shadow-2xl">
+          <!-- Main Hero Active Image -->
+          <img id="hero-img" src="https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=1200&auto=format&fit=crop" alt="Resplendent Ceylon Hero" class="w-full h-full object-cover interactive-hero-img filter brightness-[0.8] group-hover:scale-105 duration-1000">
+          
+          <!-- Image label shield overlay -->
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent p-6 pt-20 text-left flex flex-col justify-end">
+            <span class="text-golden font-mono text-[10px] uppercase tracking-wider mb-1" id="hero-img-location">EXPEDITION SCENE #01</span>
+            <h3 class="text-xl font-serif text-white font-semibold tracking-tight" id="hero-img-title">Sigiriya Fortress Heights</h3>
+            <p class="text-slate-300 text-xs leading-relaxed mt-1 hidden sm:block font-sans" id="hero-img-desc truncate">
+              Rising majestic above the rich forest ceiling of Kandy.
+            </p>
+          </div>
+
+          <!-- Circular Switch floating tabs -->
+          <div class="absolute top-4 right-4 flex flex-col gap-2 bg-slate-950/80 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
+            <button onclick="changeHeroSpec(0)" class="w-8 h-8 rounded-xl flex items-center justify-center font-mono text-[10px] font-bold text-golden bg-white/10 hover:bg-white/20 transition-all border border-golden/30" id="hero-btn-0">01</button>
+            <button onclick="changeHeroSpec(1)" class="w-8 h-8 rounded-xl flex items-center justify-center font-mono text-[10px] font-bold text-slate-400 bg-transparent hover:bg-white/10 transition-all" id="hero-btn-1">02</button>
+            <button onclick="changeHeroSpec(2)" class="w-8 h-8 rounded-xl flex items-center justify-center font-mono text-[10px] font-bold text-slate-400 bg-transparent hover:bg-white/10 transition-all" id="hero-btn-2">03</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scenic Wonders Grid Frame -->
+    <section id="highlights" class="max-w-7xl mx-auto px-6 space-y-10 scroll-mt-28">
+      <div class="text-left max-w-xl space-y-3">
+        <span class="text-golden text-xs font-mono uppercase tracking-wider block">UNESCO Protected Wonders</span>
+        <h2 class="text-3xl sm:text-4xl font-serif text-white dark:text-white light:text-slate-900 tracking-tight font-bold">
+          Explore Sovereign Relics
+        </h2>
+        <p class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-500">
+          Click any landmark relic card to reveal its geographic metrics and seasonal tips.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Landmark 1 -->
+        <div onclick="openLandmarkModal('sigiriya')" class="glass-card rounded-2xl overflow-hidden flex flex-col cursor-pointer hover:border-golden/40 transition-all duration-300 relative group/card h-full">
+          <div class="h-48 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1588598124041-3eb2c5952fdf?q=80&w=600" alt="Sigiriya" class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105">
+            <span class="absolute top-3 right-3 px-2 py-1 rounded bg-slate-950/80 text-[10px] font-mono text-golden border border-white/10">349m Alt</span>
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between text-left">
+            <div class="space-y-2">
+              <h3 class="text-lg font-serif text-white dark:text-white light:text-slate-900 font-semibold group-hover/card:text-golden duration-300">Sigiriya Lion Rock</h3>
+              <p class="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                An ancient rock fortress of unparalleled monumental scale with advanced water gardens.
+              </p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-white/5 dark:border-white/5 light:border-slate-200 flex items-center justify-between text-[11px] font-mono text-golden">
+              <span>View Secrets</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Landmark 2 -->
+        <div onclick="openLandmarkModal('galle')" class="glass-card rounded-2xl overflow-hidden flex flex-col cursor-pointer hover:border-golden/40 transition-all duration-300 relative group/card h-full">
+          <div class="h-48 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?q=80&w=600" alt="Galle Fort" class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105">
+            <span class="absolute top-3 right-3 px-2 py-1 rounded bg-slate-950/80 text-[10px] font-mono text-golden border border-white/10">Sea Level</span>
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between text-left">
+            <div class="space-y-2">
+              <h3 class="text-lg font-serif text-white dark:text-white light:text-slate-900 font-semibold group-hover/card:text-golden duration-300">Galle Dutch Fort</h3>
+              <p class="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                A living seaside archaeological fortress where cobblestoned alleys run along the waves.
+              </p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-white/5 dark:border-white/5 light:border-slate-200 flex items-center justify-between text-[11px] font-mono text-golden">
+              <span>View Secrets</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Landmark 3 -->
+        <div onclick="openLandmarkModal('kandy')" class="glass-card rounded-2xl overflow-hidden flex flex-col cursor-pointer hover:border-golden/40 transition-all duration-300 relative group/card h-full">
+          <div class="h-48 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?q=80&w=600" alt="Temple of the Tooth" class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105">
+            <span class="absolute top-3 right-3 px-2 py-1 rounded bg-slate-950/80 text-[10px] font-mono text-golden border border-white/10">490m Alt</span>
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between text-left">
+            <div class="space-y-2">
+              <h3 class="text-lg font-serif text-white dark:text-white light:text-slate-900 font-semibold group-hover/card:text-golden duration-300">Temple of the Tooth</h3>
+              <p class="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                Kandy's primary golden roof sanctuary sheltering the deep, sacred relic of Lord Buddha.
+              </p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-white/5 dark:border-white/5 light:border-slate-200 flex items-center justify-between text-[11px] font-mono text-golden">
+              <span>View Secrets</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Landmark 4 -->
+        <div onclick="openLandmarkModal('ella')" class="glass-card rounded-2xl overflow-hidden flex flex-col cursor-pointer hover:border-golden/40 transition-all duration-300 relative group/card h-full">
+          <div class="h-48 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=600" alt="Nine Arch Bridge" class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105">
+            <span class="absolute top-3 right-3 px-2 py-1 rounded bg-slate-950/80 text-[10px] font-mono text-golden border border-white/10">1,041m Alt</span>
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between text-left">
+            <div class="space-y-2">
+              <h3 class="text-lg font-serif text-white dark:text-white light:text-slate-900 font-semibold group-hover/card:text-golden duration-300">Nine Arch Bridge</h3>
+              <p class="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                A monumental masterclass of colonial engineering, crafted entirely from stone and brick.
+              </p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-white/5 dark:border-white/5 light:border-slate-200 flex items-center justify-between text-[11px] font-mono text-golden">
+              <span>View Secrets</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Curator Marketplace Section -->
+    <section id="curators" class="max-w-7xl mx-auto px-6 space-y-10 scroll-mt-28">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="text-left space-y-3 max-w-xl">
+          <span class="text-golden text-xs font-mono uppercase tracking-wider block">Private Royal Guild</span>
+          <h2 class="text-3xl sm:text-4xl font-serif text-white dark:text-white light:text-slate-900 tracking-tight font-bold">
+            Select Elite Local Specialists
+          </h2>
+          <p class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-500">
+            Highly trained specialists licensed under Ceylon's highest benchmarks.
+          </p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap gap-2 text-xs font-mono">
+          <button onclick="filterGuides('all')" class="guide-filter-btn px-4 py-2 rounded-xl bg-golden text-slate-950 border border-golden/50 font-medium tracking-wide transition-all" id="filter-btn-all">All Curators</button>
+          <button onclick="filterGuides('Wildlife')" class="guide-filter-btn px-4 py-2 rounded-xl bg-white/5 border border-white/15 text-slate-300 hover:text-white hover:border-golden/35 transition-all" id="filter-btn-Wildlife">Wildlife</button>
+          <button onclick="filterGuides('History')" class="guide-filter-btn px-4 py-2 rounded-xl bg-white/5 border border-white/15 text-slate-300 hover:text-white hover:border-golden/35 transition-all" id="filter-btn-History">History</button>
+          <button onclick="filterGuides('Adventure')" class="guide-filter-btn px-4 py-2 rounded-xl bg-white/5 border border-white/15 text-slate-300 hover:text-white hover:border-golden/35 transition-all" id="filter-btn-Adventure">Adventure</button>
+          <button onclick="filterGuides('Cultural')" class="guide-filter-btn px-4 py-2 rounded-xl bg-white/5 border border-white/15 text-slate-300 hover:text-white hover:border-golden/35 transition-all" id="filter-btn-Cultural">Cultural</button>
+        </div>
+      </div>
+
+      <!-- Guides Cards Container -->
+      <div id="guides-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Loader / Handled dynamically below -->
+      </div>
+    </section>
+
+    <!-- Booking Estimation Sandbox Section -->
+    <section id="booking-section" class="max-w-7xl mx-auto px-6 scroll-mt-28">
+      <div class="glass-card p-8 md:p-12 rounded-3xl grid grid-cols-1 lg:grid-cols-12 gap-8 text-left relative overflow-hidden bg-gradient-to-br from-slate-950/90 to-emerald-950/20 border border-white/10">
+        
+        <div class="lg:col-span-5 space-y-6 flex flex-col justify-between">
+          <div class="space-y-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-golden/10 border border-golden/20 text-[10px] font-mono text-golden tracking-wider uppercase">
+              <i data-lucide="calculator" class="w-3 h-3"></i> Quick Expedition Planner
+            </span>
+            <h2 class="text-3xl font-serif text-white dark:text-white light:text-slate-900 font-bold leading-tight">
+              Estimate Your Curated Journey
+            </h2>
+            <p class="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 leading-relaxed">
+              Plan and calculate specialized private tours on the go. Switch between specialists to preview hourly parameters immediately.
+            </p>
+          </div>
+
+          <!-- Feature items list -->
+          <div class="space-y-3 pt-4 border-t border-white/5 dark:border-white/5 light:border-slate-200">
+            <div class="flex items-center gap-2.5 text-xs text-slate-300 dark:text-slate-300 light:text-slate-700">
+              <i data-lucide="check" class="w-4 h-4 text-golden stroke-[3]"></i>
+              <span>All-inclusive professional custom gear included</span>
+            </div>
+            <div class="flex items-center gap-2.5 text-xs text-slate-300 dark:text-slate-300 light:text-slate-700">
+              <i data-lucide="check" class="w-4 h-4 text-golden stroke-[3]"></i>
+              <span>SLTDA Nationally Certified Specialist curators</span>
+            </div>
+            <div class="flex items-center gap-2.5 text-xs text-slate-300 dark:text-slate-300 light:text-slate-700">
+              <i data-lucide="check" class="w-4 h-4 text-golden stroke-[3]"></i>
+              <span>Zero reservation cancellation penalty policies</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 p-6 rounded-2xl bg-slate-950/60 dark:bg-slate-950/60 light:bg-[#ECE6E0]/60 border border-white/5 dark:border-white/5 light:border-slate-200/50 space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-widest mb-1.5 font-semibold">Select Curator</label>
+              <select id="calc-guide" onchange="calculateEstimate()" class="w-full bg-slate-900 dark:bg-slate-900 light:bg-white text-white border border-white/10 dark:border-white/10 light:border-slate-300 p-2.5 rounded-xl text-xs font-mono text-golden font-bold focus:border-golden outline-none transition-all">
+                <option value="chathura" data-price="28" selected>Chathura Jayasekara - $28/hr</option>
+                <option value="anjali" data-price="25">Anjali Perera - $25/hr</option>
+                <option value="kasun" data-price="22">Kasun Bandara - $22/hr</option>
+                <option value="sanduni" data-price="30">Sanduni Wickramasinghe - $30/hr</option>
+                <option value="roshan" data-price="24">Roshan de Silva - $24/hr</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-widest mb-1.5 font-semibold">Expedition Duration (Hours)</label>
+              <input type="number" id="calc-hours" oninput="calculateEstimate()" min="1" max="72" value="6" class="w-full bg-slate-900 dark:bg-slate-900 light:bg-white text-white border border-white/10 dark:border-white/10 light:border-slate-300 p-2 rounded-xl text-sm focus:border-golden outline-none transition-all font-mono font-bold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/5 dark:border-white/5 light:border-slate-200">
+            <div>
+              <label class="block text-[10px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-widest mb-1 font-semibold">Tour Base Price</label>
+              <span class="text-lg font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 font-bold" id="calc-base-total">$168 USD</span>
+            </div>
+            <div>
+              <label class="block text-[10px] font-mono text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-widest mb-1 font-semibold">Estimated Total (Taxes Incl.)</label>
+              <span class="text-2xl font-mono text-golden font-bold" id="calc-grand-total">$184.80 USD</span>
+            </div>
+          </div>
+
+          <button onclick="triggerSimulatedBooking()" class="w-full py-3.5 rounded-xl bg-golden hover:bg-golden/90 text-slate-950 font-bold text-xs tracking-wider uppercase transition-all shadow-lg font-mono active:scale-95 duration-100 flex items-center justify-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> Lock-In Curated Quote
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Landmark Deep Secrets Modal Spot -->
+  <div id="landmark-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-50 items-center justify-center p-4 transition-all duration-300">
+    <div class="glass-card w-full max-w-2xl rounded-3xl overflow-hidden bg-slate-950 max-h-[90vh] flex flex-col relative text-left">
+      <!-- Close floating btn -->
+      <button onclick="closeLandmarkModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-950/85 text-slate-400 hover:text-white border border-white/10 hover:border-golden/40 transition-all cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="h-64 sm:h-80 relative overflow-hidden shrink-0">
+        <img id="modal-img" src="" alt="" class="w-full h-full object-cover">
+        <!-- Tag -->
+        <span id="modal-tagline" class="absolute bottom-4 left-4 inline-block px-3 py-1 bg-golden text-slate-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-full">Explore Relic</span>
+      </div>
+
+      <div class="p-6 md:p-8 overflow-y-auto space-y-6">
+        <div class="space-y-2">
+          <h2 id="modal-title" class="text-2xl sm:text-3xl font-serif text-white dark:text-white light:text-slate-900 font-bold">Landmark Title</h2>
+          <p id="modal-desc" class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-600 leading-relaxed font-sans">Detailed description gets rendered here dynamically.</p>
+        </div>
+
+        <div class="border-t border-white/10 dark:border-white/10 light:border-slate-200 pt-4 grid grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Altitude Parameter</span>
+            <div class="flex items-center gap-1 text-xs text-slate-200 dark:text-slate-200 light:text-slate-700 font-medium">
+              <i data-lucide="mountain" class="w-3.5 h-3.5 text-golden"></i>
+              <span id="modal-altitude">Altitude info</span>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Optimal Window</span>
+            <div class="flex items-center gap-1 text-xs text-slate-200 dark:text-slate-200 light:text-slate-700 font-medium">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-golden"></i>
+              <span id="modal-time">Optimal timeline</span>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Entrance Standard</span>
+            <div class="flex items-center gap-1 text-xs text-slate-200 dark:text-slate-200 light:text-slate-700 font-medium">
+              <i data-lucide="ticket" class="w-3.5 h-3.5 text-golden"></i>
+              <span id="modal-fee">Entrance standard</span>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Weather Condition</span>
+            <div class="flex items-center gap-1 text-xs text-slate-200 dark:text-slate-200 light:text-slate-700 font-medium">
+              <i data-lucide="sun" class="w-3.5 h-3.5 text-golden animate-spin" style="animation-duration: 10s"></i>
+              <span id="modal-weather">Typical weather</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Simulated Ariya Travel Intelligent Oracle Chat -->
+  <div id="ai-chat-bubble" class="fixed bottom-6 right-6 z-40 flex flex-col items-end transition-all">
+    <!-- Mini floating trigger sphere -->
+    <button onclick="toggleAiPanel()" class="flex items-center gap-2 pl-4 pr-5 py-3 rounded-full bg-slate-950 text-white border-2 border-golden/50 hover:border-golden shadow-2xl hover:scale-105 duration-300 cursor-pointer text-xs font-mono font-medium" id="ai-sphere">
+      <div class="relative flex items-center justify-center">
+        <span class="absolute inline-flex h-full w-full rounded-full bg-golden/40 animate-ping"></span>
+        <i data-lucide="sparkles" class="w-4 h-4 text-golden"></i>
+      </div>
+      <span>Consult Ariya AI</span>
+    </button>
+
+    <!-- Detailed chat companion layout -->
+    <div id="ai-panel" class="hidden w-80 sm:w-96 rounded-2xl border border-white/10 shadow-2xl bg-slate-950 overflow-hidden text-left flex-col text-xs font-sans mt-3">
+      <!-- Conversation title shield -->
+      <div class="p-4 bg-gradient-to-r from-emerald-950 to-slate-950 border-b border-white/5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-1.5 rounded-lg bg-golden/10 border border-golden/30">
+            <i data-lucide="sparkles" class="w-4 h-4 text-golden animate-pulse"></i>
+          </div>
+          <div>
+            <h4 class="font-serif font-bold text-white text-sm">Ariya Travel Oracle</h4>
+            <span class="text-[9px] font-mono text-emerald-400">Gemini-Powered Expert (Simulated)</span>
+          </div>
+        </div>
+        <button onclick="toggleAiPanel()" class="text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/5">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Messages frame -->
+      <div id="ai-messages" class="p-4 space-y-3 max-h-60 overflow-y-auto">
+        <!-- Greeting -->
+        <div class="flex gap-2 items-start max-w-xs">
+          <div class="w-6 h-6 rounded-full bg-golden/10 border border-golden/30 flex items-center justify-center shrink-0">
+            <i data-lucide="bot" class="w-3.5 h-3.5 text-golden"></i>
+          </div>
+          <div class="bg-white/5 p-2 rounded-xl text-[11px] text-slate-300 leading-relaxed">
+            Welcome to Ceylon, the Resplendent Isle! 🌺 I am Ariya. Ask me anything about Sigiriya Lion Rock, Galle Fort, the Ella trains, or local gourmet hints!
+          </div>
+        </div>
+      </div>
+
+      <!-- Input box -->
+      <div class="p-3 border-t border-white/5 bg-slate-900/60 flex items-center gap-2">
+        <input type="text" id="ai-user-input" onkeydown="handleAiInput(event)" placeholder="Ask about tea gardens, trains..." class="flex-1 bg-slate-950 text-white rounded-lg p-2.5 outline-none border border-white/5 focus:border-golden/40 text-[11px]">
+        <button onclick="sendAiMessage()" class="p-2.5 bg-golden hover:bg-golden/90 text-slate-950 rounded-lg flex items-center justify-center font-bold active:scale-95 duration-100">
+          <i data-lucide="send-horizontal" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Success notification banner -->
+  <div id="booking-success-banner" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 transform scale-90 opacity-0 pointer-events-none transition-all duration-300 max-w-sm w-full">
+    <div class="bg-gradient-to-br from-[#020617] to-[#04331e] border-2 border-emerald-500/30 p-5 rounded-2xl shadow-2xl flex gap-3 text-left">
+      <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0 self-start">
+        <i data-lucide="shield-check" class="w-5 h-5"></i>
+      </div>
+      <div class="space-y-1">
+        <h4 class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">Pricing Quote Secured!</h4>
+        <p class="text-[11px] text-slate-300 font-sans leading-relaxed">
+          Your quote has been stored in temporary local variables. The expert curators of Ceylonta have been notified.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Frame -->
+  <footer class="bg-slate-950/90 dark:bg-slate-950/90 light:bg-[#ECE6E0] border-t border-white/5 dark:border-white/5 light:border-slate-200 py-16 px-6 mt-20 text-slate-500 text-xs">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-2">
+        <i data-lucide="map-pin" class="w-4 h-4 text-golden/60"></i>
+        <span class="text-[11px] font-mono tracking-widest uppercase">Galle Fort · Ella Highlands · Kandy Relic Complex · Sigiriya Citadel</span>
+      </div>
+      <div class="text-center md:text-right space-y-1">
+        <p class="font-serif tracking-wider text-slate-400 dark:text-slate-400 light:text-slate-900 font-bold uppercase text-[11px]">
+          © 2026 CEYLONTA. ALL RIGHTS SECURED BY ROYAL COVENANT.
+        </p>
+        <p class="text-[10px] text-slate-600 dark:text-slate-600 light:text-slate-500">
+          Curated luxury travel blueprints & private guided expeditions under the Resplendent Island. Developed independently using Google AI Studio.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // System metadata storage mapping
+    const LANDMARKS_DATA = {
+      sigiriya: {
+        title: "Sigiriya Lion Rock",
+        tagline: "The Wonder of Asia",
+        desc: "An ancient rock fortress of unparalleled monumental scale. Rising 200 meters from the surrounding jungle, Sigiriya is famed for its giant lion paws gate, exquisite frescoes of celestial maidens, and the advanced hydrological engineering of its royal pleasure gardens.",
+        img: "https://images.unsplash.com/photo-1588598124041-3eb2c5952fdf?q=80&w=1200",
+        altitude: "349m above sea level",
+        time: "January to April (7:00 AM Sunrise)",
+        fee: "$36 USD (Foreign Nationals)",
+        weather: "Warm & Tropical, 28°C - 32°C"
+      },
+      galle: {
+        title: "Galle Dutch Fort",
+        tagline: "Where Heritage Meets the Ocean",
+        desc: "A coastal rampart of history. Built by the Portuguese and extensively fortified by the Dutch in the 17th century, Galle Fort is a living archaeological reserve where narrow cobblestoned alleys meet the crashing waves of the Indian Ocean.",
+        img: "https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?q=80&w=1200",
+        altitude: "Sea Level Edge",
+        time: "November to April (Perfect Twilight Promenade)",
+        fee: "Free Entry (Museums request separate fee of $5 USD)",
+        weather: "Coastal Breeze, 27°C - 29°C"
+      },
+      kandy: {
+        title: "Temple of the Tooth",
+        tagline: "The Sacred Spiritual Heart",
+        desc: "Kandy's crowning spiritual sanctuary. Nestled in the misty hills, this golden-roofed temple complex houses Sri Lanka's most sacred Buddhist relic—the left canine tooth of Gautama Buddha, enveloped in a series of gold caskets.",
+        img: "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?q=80&w=1200",
+        altitude: "490m above sea level",
+        time: "July to August (During Esala Perahera)",
+        fee: "$10 USD (Foreign Nationals)",
+        weather: "Pleasant Hill Country, 22°C - 26°C"
+      },
+      ella: {
+        title: "Nine Arch Bridge",
+        tagline: "The Bridge in the Sky",
+        desc: "A monumental masterclass of colonial-era engineering. Spanning a dense tropical valley in Ella, this spectacular bridge was constructed entirely from stone, brick, and cement with absolutely no steel or iron support structures.",
+        img: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=1200",
+        altitude: "1,041m above sea level",
+        time: "Early Morning (6:30 AM for scenic trains)",
+        fee: "Free access via rainforest trail",
+        weather: "Misty & Humid, 18°C - 24°C"
+      }
+    };
+
+    const GUIDES_DATA = [
+      {
+        id: "g1",
+        name: "Chathura Jayasekara",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&fit=crop",
+        bio: "Passionate conservationist and certified wildlife tracker. I have spent over 12 years navigating Sri Lanka's national parks, specializing in leopard tracing in Yala and elephant herd migrations.",
+        level: "12+ Years",
+        languages: ["English", "Sinhala", "German"],
+        price: 28,
+        tags: ["Wildlife Expert", "Safari Specialist"],
+        rating: 4.95,
+        location: "Sigiriya"
+      },
+      {
+        id: "g2",
+        name: "Anjali Perera",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&fit=crop",
+        bio: "History PhD graduate with a love for colonial architecture. I guide curious travelers through Galle Fort's secret underground tunnels and Dutch-Sinhalese historical treaties.",
+        level: "8 Years",
+        languages: ["English", "French", "Sinhala"],
+        price: 25,
+        tags: ["History Guide", "Cultural Expert"],
+        rating: 4.92,
+        location: "Galle Fort"
+      },
+      {
+        id: "g3",
+        name: "Kasun Bandara",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&fit=crop",
+        bio: "Elite trekker and professional mountaineer. Let's scale Ella Rock, catch the magical fog rising over the Ravana falls, and climb Adam's Peak for sunset hikes.",
+        level: "6 Years",
+        languages: ["English", "Japanese", "Sinhala"],
+        price: 22,
+        tags: ["Hiking Specialist", "Adventure Trekking"],
+        rating: 4.89,
+        location: "Ella"
+      },
+      {
+        id: "g4",
+        name: "Sanduni Wickramasinghe",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&fit=crop",
+        bio: "Kandyan cultural dancer and local historian. Specialized in the sacred rites of the Kingdom of Kandy, traditional local tea estates heritage, and Buddhist art history.",
+        level: "10 Years",
+        languages: ["English", "Sinhala", "Mandarin"],
+        price: 30,
+        tags: ["Cultural Expert", "Tea Heritage"],
+        rating: 4.98,
+        location: "Kandy"
+      },
+      {
+        id: "g5",
+        name: "Roshan de Silva",
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&fit=crop",
+        bio: "Culinary expert and street food hunter. I specialize in curated culinary journeys through Colombo's Pettah markets, explaining spices, and cooking authentic Ceylon crab curry.",
+        level: "5 Years",
+        languages: ["English", "Sinhala"],
+        price: 24,
+        tags: ["Culinary Tour", "Colombo Local"],
+        rating: 4.85,
+        location: "Colombo"
+      }
+    ];
+
+    const HERO_SPECS = [
+      {
+        img: "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=1200&auto=format&fit=crop",
+        loc: "EXPEDITION HIGHLIGHT #01",
+        title: "Sigiriya Citadel Citadel Heights",
+        desc: "An incredible ancient palace rising majestically above the dense tropical jungle canopy."
+      },
+      {
+        img: "https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=1200&auto=format&fit=crop",
+        loc: "EXPEDITION HIGHLIGHT #02",
+        title: "Ella Highland Train Passage",
+        desc: "Gazing over pristine colonial stonework while the mountain trains pierce through thick morning mist."
+      },
+      {
+        img: "https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?q=80&w=1200&auto=format&fit=crop",
+        loc: "EXPEDITION HIGHLIGHT #03",
+        title: "Galle Fort Sunset Bastion",
+        desc: "Relaxing on colonial coral battlements as the tropical sun dips below the brilliant blue ocean."
+      }
+    ];
+
+    // Page Load Setup
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize Icons
+      lucide.createIcons();
+      
+      // Render Guides
+      renderGuidesGrid(GUIDES_DATA);
+
+      // Handle Scroll Progress
+      window.addEventListener("scroll", () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (window.scrollY / docHeight) * 100;
+        document.getElementById("scroll-bar").style.width = progress + "%";
+      });
+
+      // LocalStorage Theme loading
+      const cachedTheme = localStorage.getItem("theme_preview") || "dark";
+      setThemeClass(cachedTheme);
+    });
+
+    // Theme Switch implementation
+    function toggleTheme() {
+      const current = document.documentElement.classList.contains("light") ? "dark" : "light";
+      setThemeClass(current);
+    }
+
+    function setThemeClass(theme) {
+      const togglerIcon = document.getElementById("theme-icon");
+      if (theme === "light") {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+        localStorage.setItem("theme_preview", "light");
+        if (togglerIcon) {
+          togglerIcon.setAttribute("data-lucide", "moon");
+        }
+      } else {
+        document.documentElement.classList.remove("light");
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme_preview", "dark");
+        if (togglerIcon) {
+          togglerIcon.setAttribute("data-lucide", "sun");
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // Hero carousel swap
+    function changeHeroSpec(index) {
+      const spec = HERO_SPECS[index];
+      
+      // Update element highlights with transition fades
+      const imgEle = document.getElementById("hero-img");
+      const locEle = document.getElementById("hero-img-location");
+      const titleEle = document.getElementById("hero-img-title");
+      const descEle = document.getElementById("hero-img-desc");
+
+      imgEle.style.opacity = "0.2";
+      setTimeout(() => {
+        imgEle.src = spec.img;
+        locEle.innerText = spec.loc;
+        titleEle.innerText = spec.title;
+        imgEle.style.opacity = "0.8";
+      }, 350);
+
+      // Update button colors
+      for (let i = 0; i < 3; i++) {
+        const btn = document.getElementById(`hero-btn-${i}`);
+        if (i === index) {
+          btn.className = "w-8 h-8 rounded-xl flex items-center justify-center font-mono text-[10px] font-bold text-golden bg-white/10 hover:bg-white/20 transition-all border border-golden/30";
+        } else {
+          btn.className = "w-8 h-8 rounded-xl flex items-center justify-center font-mono text-[10px] font-bold text-slate-400 bg-transparent hover:bg-white/10 transition-all";
+        }
+      }
+    }
+
+    // Guides Filter Logic
+    function filterGuides(tag) {
+      // UI button coloring updates
+      const filterBtns = document.querySelectorAll(".guide-filter-btn");
+      filterBtns.forEach(btn => {
+        btn.classList.add("bg-white/5", "border-white/15", "text-slate-300");
+        btn.classList.remove("bg-golden", "text-slate-950", "border-golden/50");
+      });
+
+      const selectedBtn = document.getElementById(`filter-btn-${tag}`);
+      selectedBtn.classList.remove("bg-white/5", "border-white/15", "text-slate-300");
+      selectedBtn.classList.add("bg-golden", "text-slate-950", "border-golden/50");
+
+      if (tag === "all") {
+        renderGuidesGrid(GUIDES_DATA);
+      } else {
+        const filtered = GUIDES_DATA.filter(g => g.tags.some(t => t.includes(tag)));
+        renderGuidesGrid(filtered);
+      }
+    }
+
+    function renderGuidesGrid(guides) {
+      const grid = document.getElementById("guides-grid");
+      grid.innerHTML = "";
+
+      if (guides.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500 font-mono text-sm">No specialists matched this filter.</div>`;
+        return;
+      }
+
+      guides.forEach(g => {
+        const card = document.createElement("div");
+        card.className = "glass-card rounded-2xl overflow-hidden p-6 text-left flex flex-col justify-between h-full relative group";
+        
+        let tagsHtml = g.tags.map(t => `<span class="px-2 py-0.5 rounded-md bg-golden/10 border border-golden/20 text-golden text-[9px] font-mono">${t}</span>`).join(" ");
+
+        card.innerHTML = `
+          <div class="space-y-4">
+            <!-- Header elements -->
+            <div class="flex items-start justify-between">
+              <div class="relative">
+                <img src="${g.avatar}" alt="${g.name}" class="w-16 h-16 rounded-2xl object-cover border-2 border-white/10 group-hover:border-golden/30 transition-colors">
+                <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-950" title="Online now"></span>
+              </div>
+              <div class="flex gap-1.5">${tagsHtml}</div>
+            </div>
+
+            <!-- Title content -->
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <h3 class="text-lg font-serif text-white dark:text-white light:text-slate-900 font-bold group-hover:text-golden duration-300">${g.name}</h3>
+                <span class="text-xs text-golden font-mono">★ ${g.rating}</span>
+              </div>
+              <p class="text-[10px] font-mono text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3 h-3 text-golden"></i> ${g.location} &middot; ${g.level} Exp
+              </p>
+            </div>
+
+            <!-- Bio -->
+            <p class="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 line-clamp-3 leading-relaxed">
+              "${g.bio}"
+            </p>
+          </div>
+
+          <div class="pt-5 mt-5 border-t border-white/5 dark:border-white/5 light:border-slate-200 flex items-center justify-between">
+            <div>
+              <span class="text-[9px] font-mono text-slate-500 uppercase block leading-none mb-1">Elite Guide Charge</span>
+              <span class="text-sm font-mono text-white dark:text-white light:text-slate-900 font-bold">$${g.price} <span class="text-[10px] font-sans font-normal text-slate-400">/ Hour</span></span>
+            </div>
+            
+            <a href="#booking-section" onclick="selectGuideInCalc('${g.id}')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-900 to-emerald-850 hover:from-golden hover:to-amber-500 hover:text-slate-950 font-mono text-[10px] font-bold text-white tracking-widest uppercase transition-all duration-300">
+              Select
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function selectGuideInCalc(guideId) {
+      const selectEle = document.getElementById("calc-guide");
+      if (guideId === "g1") selectEle.value = "chathura";
+      if (guideId === "g2") selectEle.value = "anjali";
+      if (guideId === "g3") selectEle.value = "kasun";
+      if (guideId === "g4") selectEle.value = "sanduni";
+      if (guideId === "g5") selectEle.value = "roshan";
+      calculateEstimate();
+    }
+
+    // Slider Quote Estimator
+    function calculateEstimate() {
+      const sel = document.getElementById("calc-guide");
+      const opt = sel.options[sel.selectedIndex];
+      const price = Number(opt.getAttribute("data-price"));
+      const hours = Math.max(1, Number(document.getElementById("calc-hours").value || 1));
+
+      const baseMoney = price * hours;
+      const taxes = baseMoney * 0.10; // Luxury surcharge
+      const grandTotal = baseMoney + taxes;
+
+      document.getElementById("calc-base-total").innerText = `$${baseMoney.toFixed(2)} USD`;
+      document.getElementById("calc-grand-total").innerText = `$${grandTotal.toFixed(2)} USD`;
+    }
+
+    function triggerSimulatedBooking() {
+      const banner = document.getElementById("booking-success-banner");
+      banner.style.opacity = "1";
+      banner.style.transform = "translateX(-50%) scale(1)";
+      banner.style.pointerEvents = "auto";
+
+      setTimeout(() => {
+        banner.style.opacity = "0";
+        banner.style.transform = "translateX(-50%) scale(0.9)";
+        banner.style.pointerEvents = "none";
+      }, 3500);
+    }
+
+    // Modal Operations
+    function openLandmarkModal(id) {
+      const meta = LANDMARKS_DATA[id];
+      if (!meta) return;
+
+      document.getElementById("modal-img").src = meta.img;
+      document.getElementById("modal-title").innerText = meta.title;
+      document.getElementById("modal-tagline").innerText = meta.tagline;
+      document.getElementById("modal-desc").innerText = meta.desc;
+      
+      document.getElementById("modal-altitude").innerText = meta.altitude;
+      document.getElementById("modal-time").innerText = meta.time;
+      document.getElementById("modal-fee").innerText = meta.fee;
+      document.getElementById("modal-weather").innerText = meta.weather;
+
+      const modal = document.getElementById("landmark-modal");
+      modal.style.display = "flex";
+      modal.style.opacity = "0";
+      setTimeout(() => {
+        modal.style.opacity = "1";
+      }, 10);
+    }
+
+    function closeLandmarkModal() {
+      const modal = document.getElementById("landmark-modal");
+      modal.style.opacity = "0";
+      setTimeout(() => {
+        modal.style.display = "none";
+      }, 250);
+    }
+
+    // AI Chat Panel Operations
+    function toggleAiPanel() {
+      const panel = document.getElementById("ai-panel");
+      const sphere = document.getElementById("ai-sphere");
+
+      if (panel.style.display === "flex") {
+        panel.style.display = "none";
+        sphere.style.display = "flex";
+      } else {
+        panel.style.display = "flex";
+        sphere.style.display = "none";
+        // scroll messages to bottom
+        setTimeout(() => {
+          const m = document.getElementById("ai-messages");
+          m.scrollTop = m.scrollHeight;
+        }, 50);
+      }
+    }
+
+    function handleAiInput(e) {
+      if (e.key === "Enter") {
+        sendAiMessage();
+      }
+    }
+
+    function sendAiMessage() {
+      const input = document.getElementById("ai-user-input");
+      const txt = input.value.trim();
+      if (!txt) return;
+
+      // Add user speech bubble
+      const msgContainer = document.getElementById("ai-messages");
+      const userBubble = document.createElement("div");
+      userBubble.className = "flex gap-2 items-start justify-end max-w-xs ml-auto";
+      userBubble.innerHTML = `
+        <div class="bg-golden/20 border border-golden/30 p-2 rounded-xl text-[11px] text-slate-300 leading-relaxed text-right">
+          ${txt}
+        </div>
+      `;
+      msgContainer.appendChild(userBubble);
+      input.value = "";
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+
+      // Simulated Intelligent Response matching Ceylon aesthetics
+      setTimeout(() => {
+        const replyBubble = document.createElement("div");
+        replyBubble.className = "flex gap-2 items-start max-w-xs";
+        
+        let responsePhrase = "That sounds like an exquisite journey. Colombo and Galle are filled with pristine secrets. Let me consult our curators for you.";
+        const low = txt.toLowerCase();
+
+        if (low.includes("sigiriya") || low.includes("rock") || low.includes("relic")) {
+          responsePhrase = "Sigiriya rises 200m above the ancient royal fields. Our specialist tracker Chathura recommends setting off at 6:45 AM for pristine cloud cover and mist photography! 🦁";
+        } else if (low.includes("train") || low.includes("ella") || low.includes("bridge")) {
+          responsePhrase = "Ella's iconic Nine Arch Bridge is constructed purely of colonial brick. Kasun advises taking the tea estate trail by sunrise for the direct look over passing steam-trains. 🚂";
+        } else if (low.includes("galle") || low.includes("coast")) {
+          responsePhrase = "Galle Fort embodies centuries of Portuguese and Dutch fortifications. Anjali Perera is our resident historian and PhD here, who knows all the forgotten rampart corridors! 🌊";
+        } else if (low.includes("food") || low.includes("curry") || low.includes("eat")) {
+          responsePhrase = "Ah, culinary treasures! Roshan de Silva suggests heading to Pettah Street Markets for traditional hoppers, deep-dished lagoon crab curry, and highly aromatic Ceylon tea. 🍛";
+        }
+
+        replyBubble.innerHTML = `
+          <div class="w-6 h-6 rounded-full bg-golden/10 border border-golden/30 flex items-center justify-center shrink-0">
+            <i data-lucide="bot" class="w-3.5 h-3.5 text-golden"></i>
+          </div>
+          <div class="bg-white/5 p-2 rounded-xl text-[11px] text-slate-300 leading-relaxed">
+            ${responsePhrase}
+          </div>
+        `;
+        msgContainer.appendChild(replyBubble);
+        lucide.createIcons();
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+      }, 800);
+    }
+  </script>
+</body>
+</html>

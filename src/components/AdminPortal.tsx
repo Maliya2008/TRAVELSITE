@@ -110,6 +110,120 @@ export default function AdminPortal({
     reader.readAsDataURL(file);
   };
 
+  const uploadBackdropFile = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const b64 = reader.result as string;
+      if (index === 1) {
+        saveSettings({ ...settings, heroBgImage: b64 });
+      } else if (index === 2) {
+        saveSettings({ ...settings, heroBgImage2: b64 });
+      } else if (index === 3) {
+        saveSettings({ ...settings, heroBgImage3: b64 });
+      } else if (index === 4) {
+        saveSettings({ ...settings, heroBgImage4: b64 });
+      } else if (index === 5) {
+        saveSettings({ ...settings, heroBgImage5: b64 });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const uploadMultipleBackdrops = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const count = Math.min(files.length, 5);
+    const updatedSettings = { ...settings };
+    
+    let processed = 0;
+    for (let i = 0; i < count; i++) {
+      const reader = new FileReader();
+      const currentIdx = i + 1;
+      const file = files[i];
+      reader.onloadend = () => {
+        const b64 = reader.result as string;
+        if (currentIdx === 1) updatedSettings.heroBgImage = b64;
+        else if (currentIdx === 2) updatedSettings.heroBgImage2 = b64;
+        else if (currentIdx === 3) updatedSettings.heroBgImage3 = b64;
+        else if (currentIdx === 4) updatedSettings.heroBgImage4 = b64;
+        else if (currentIdx === 5) updatedSettings.heroBgImage5 = b64;
+        
+        processed++;
+        if (processed === count) {
+          saveSettings(updatedSettings);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadScenicWondersBg = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      saveSettings({ ...settings, scenicWondersBgImage: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const uploadCuratorMarketplaceBg = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      saveSettings({ ...settings, curatorMarketplaceBgImage: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const uploadPlaceImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPlaceImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const uploadGuideAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setGuideAvatar(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const uploadGuideGalleryFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const count = files.length;
+    const results: string[] = [];
+    let processed = 0;
+    
+    for (let i = 0; i < count; i++) {
+      const reader = new FileReader();
+      const file = files[i];
+      reader.onloadend = () => {
+        results.push(reader.result as string);
+        processed++;
+        if (processed === count) {
+          const existing = guidePortfolioGallery ? guidePortfolioGallery.split(",").filter(Boolean) : [];
+          const combined = [...existing, ...results].join(",");
+          setGuidePortfolioGallery(combined);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Load webhook logs on mount/auth success and tab transition
   useEffect(() => {
     // Session token check
@@ -558,26 +672,135 @@ export default function AdminPortal({
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-mono text-slate-400 block mb-1 font-bold uppercase">Cover Backdrop Image 1 URL</label>
+                      {/* Batch Cover Backdrop Uploader */}
+                      <div className="p-4 border border-dashed border-golden/35 rounded-2xl bg-slate-950/80 text-center relative group space-y-2 mt-4 mb-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={uploadMultipleBackdrops}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                        />
+                        <div className="text-xs font-mono text-golden uppercase tracking-wider font-bold flex items-center justify-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-golden animate-pulse" /> Batch Upload Cover Images (Select Multiple)
+                        </div>
+                        <p className="text-[10px] text-slate-300 leading-normal max-w-lg mx-auto">
+                          Select up to 5 local scenic images from your PC (e.g. dawn, dusk, night etc) to auto-fill all slot files at once!
+                        </p>
+                        <span className="text-[9px] text-slate-500 font-mono uppercase tracking-widest block font-bold">
+                          Click or drag multiple files to fill slot 1 to 5
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
+                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 1</label>
                           <input
                             type="text"
                             value={settings.heroBgImage}
                             onChange={(e) => saveSettings({ ...settings, heroBgImage: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-[11px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
+                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
+                            placeholder="Image URL"
                           />
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => uploadBackdropFile(1, e)}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.heroBgImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
+                            </div>
+                          </div>
                         </div>
 
-                        <div>
-                          <label className="text-[10px] font-mono text-slate-400 block mb-1 font-bold uppercase">Cover Backdrop Image 2 URL</label>
+                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
+                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 2</label>
                           <input
                             type="text"
                             value={settings.heroBgImage2 || ""}
                             onChange={(e) => saveSettings({ ...settings, heroBgImage2: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-[11px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
-                            placeholder="Optional second scenic slide"
+                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
+                            placeholder="Image URL"
                           />
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => uploadBackdropFile(2, e)}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.heroBgImage2?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
+                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 3</label>
+                          <input
+                            type="text"
+                            value={settings.heroBgImage3 || ""}
+                            onChange={(e) => saveSettings({ ...settings, heroBgImage3: e.target.value })}
+                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
+                            placeholder="Image URL"
+                          />
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => uploadBackdropFile(3, e)}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.heroBgImage3?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
+                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 4</label>
+                          <input
+                            type="text"
+                            value={settings.heroBgImage4 || ""}
+                            onChange={(e) => saveSettings({ ...settings, heroBgImage4: e.target.value })}
+                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
+                            placeholder="Image URL"
+                          />
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => uploadBackdropFile(4, e)}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.heroBgImage4?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
+                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 5</label>
+                          <input
+                            type="text"
+                            value={settings.heroBgImage5 || ""}
+                            onChange={(e) => saveSettings({ ...settings, heroBgImage5: e.target.value })}
+                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
+                            placeholder="Image URL"
+                          />
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => uploadBackdropFile(5, e)}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.heroBgImage5?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -712,6 +935,17 @@ export default function AdminPortal({
                             className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
                             placeholder="https://images.unsplash.com/..."
                           />
+                          <div className="relative mt-1.5">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={uploadScenicWondersBg}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.scenicWondersBgImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
+                            </div>
+                          </div>
                         </div>
 
                         <div>
@@ -762,6 +996,17 @@ export default function AdminPortal({
                             className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
                             placeholder="https://images.unsplash.com/..."
                           />
+                          <div className="relative mt-1.5">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={uploadCuratorMarketplaceBg}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {settings.curatorMarketplaceBgImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
+                            </div>
+                          </div>
                         </div>
 
                         <div>
@@ -962,7 +1207,7 @@ export default function AdminPortal({
                         />
                       </div>
 
-                      <div>
+                       <div>
                         <label className="text-[9px] font-mono text-slate-500 block mb-1 uppercase font-bold">Main Banner Landscape Photo URL</label>
                         <input
                           type="text"
@@ -971,6 +1216,17 @@ export default function AdminPortal({
                           placeholder="https://images.unsplash.com/..."
                           className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white font-mono text-[11px] transition-all"
                         />
+                        <div className="relative mt-1.5">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={uploadPlaceImage}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          />
+                          <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-950 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                            {placeImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
+                          </div>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
@@ -1174,6 +1430,17 @@ export default function AdminPortal({
                             placeholder="https://images.unsplash.com/..."
                             className="w-full bg-slate-950 border border-white/10 p-2.5 rounded-xl text-white text-[11px] font-mono"
                           />
+                          <div className="relative mt-1.5">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={uploadGuideAvatar}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            />
+                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-950 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                              {guideAvatar?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -1255,8 +1522,20 @@ export default function AdminPortal({
                               value={guidePortfolioGallery}
                               onChange={(e) => setGuidePortfolioGallery(e.target.value)}
                               placeholder="https://..."
-                              className="w-full bg-slate-900 border border-white/10 p-2 rounded-lg"
+                              className="w-full bg-slate-900 border border-white/10 p-2 rounded-lg text-[10px] font-mono"
                             />
+                            <div className="relative mt-1">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={uploadGuideGalleryFiles}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                              />
+                              <div className="py-1 px-1.5 rounded-md border border-dashed border-white/10 text-center bg-slate-900 hover:bg-slate-800 text-[8px] font-mono text-golden hover:text-white transition-colors cursor-pointer leading-tight">
+                                {guidePortfolioGallery ? "✓ files appended" : "Upload Local Photos (Multi-select)..."}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
