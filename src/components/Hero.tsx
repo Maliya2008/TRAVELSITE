@@ -203,7 +203,7 @@ export default function Hero({ settings }: HeroProps) {
   return (
     <div 
       ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 px-6 py-20 lg:py-28"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-transparent px-6 py-20 lg:py-28 isolate"
       id="hero-expedition-viewport"
     >
       {/* Background Slides Dynamic Render Grid */}

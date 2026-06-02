@@ -1137,14 +1137,14 @@ export default function AdminPortal({
                             <div>
                               <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Atmospheric Preset</label>
                               <select 
-                                value={settings.scenicWondersBgFilter || "brightness-30 blur-[2px]"}
+                                value={settings.scenicWondersBgFilter || "brightness-60 blur-[1px]"}
                                 onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
                                 className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded-xl p-2.5 focus:outline-none transition-all cursor-pointer bg-slate-900"
                               >
-                                <option value="brightness-30 blur-[2px]">Classic Deep Shaded</option>
-                                <option value="brightness-[0.22] saturate-[1.3] hue-rotate-15 blur-[1px]">Forest Mystique (Emerald)</option>
-                                <option value="brightness-[0.18] contrast-125 sepia blur-sm">Ancient Scroll (Sepia)</option>
-                                <option value="brightness-20 grayscale blur-[2px]">Gothic Monumental</option>
+                                <option value="brightness-60 blur-[1px]">Classic Deep Shaded</option>
+                                <option value="brightness-[0.55] saturate-[1.3] hue-rotate-15 blur-[1px]">Forest Mystique (Emerald)</option>
+                                <option value="brightness-[0.50] contrast-125 sepia blur-sm">Ancient Scroll (Sepia)</option>
+                                <option value="brightness-50 grayscale blur-[1px]">Gothic Monumental</option>
                                 <option value="brightness-100 blur-0">Raw Image (No Shading)</option>
                               </select>
                             </div>
@@ -1189,9 +1189,9 @@ export default function AdminPortal({
                                   src={settings.scenicWondersBgImage}
                                   alt="Scenic backdrop preview"
                                   referrerPolicy="no-referrer"
-                                  className={`w-full h-full object-cover transition-all duration-300 ${settings.scenicWondersBgFilter || "brightness-30 blur-[2px]"}`}
+                                  className={`w-full h-full object-cover transition-all duration-300 ${settings.scenicWondersBgFilter || "brightness-60 blur-[1px]"}`}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/30" />
                               </div>
                             ) : (
                               <div className="text-center p-4">
@@ -1249,14 +1249,14 @@ export default function AdminPortal({
                             <div>
                               <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Atmospheric Preset</label>
                               <select 
-                                value={settings.curatorMarketplaceBgFilter || "brightness-25 blur-[2px]"}
+                                value={settings.curatorMarketplaceBgFilter || "brightness-60 blur-[1px]"}
                                 onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
                                 className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded-xl p-2.5 focus:outline-none transition-all cursor-pointer bg-slate-900"
                               >
-                                <option value="brightness-25 blur-[2px]">Classic Deep Shaded</option>
-                                <option value="brightness-20 saturate-[1.3] contrast-125 blur-[1px]">Ocean Blue (Marine Contrast)</option>
-                                <option value="brightness-[0.15] sepia-[0.35] saturate-150 blur-sm">Warm Amber Safari (Savanna)</option>
-                                <option value="brightness-15 grayscale blur-[2px]">Gravel Ash (Monochrome Slate)</option>
+                                <option value="brightness-60 blur-[1px]">Classic Deep Shaded</option>
+                                <option value="brightness-65 saturate-[1.3] contrast-125 blur-[1px]">Ocean Blue (Marine Contrast)</option>
+                                <option value="brightness-[0.60] sepia-[0.35] saturate-150 blur-sm">Warm Amber Safari (Savanna)</option>
+                                <option value="brightness-55 grayscale blur-[1px]">Gravel Ash (Monochrome Slate)</option>
                                 <option value="brightness-100 blur-0">Raw Image (No Shading Overlay)</option>
                               </select>
                             </div>
@@ -1301,9 +1301,9 @@ export default function AdminPortal({
                                   src={settings.curatorMarketplaceBgImage}
                                   alt="Curator backdrop preview"
                                   referrerPolicy="no-referrer"
-                                  className={`w-full h-full object-cover transition-all duration-305 ${settings.curatorMarketplaceBgFilter || "brightness-25 blur-[2px]"}`}
+                                  className={`w-full h-full object-cover transition-all duration-305 ${settings.curatorMarketplaceBgFilter || "brightness-60 blur-[1px]"}`}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/30" />
                               </div>
                             ) : (
                               <div className="text-center p-4">

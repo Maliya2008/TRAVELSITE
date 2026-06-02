@@ -84,9 +84,9 @@ let dbSettings = {
   theme: "dark" as "dark" | "light",
   allowFadingAnimations: true,
   scenicWondersBgImage: "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?q=80&w=1600&auto=format&fit=crop",
-  scenicWondersBgFilter: "brightness-30 blur-[2px]",
+  scenicWondersBgFilter: "brightness-60 blur-[1px]",
   curatorMarketplaceBgImage: "https://images.unsplash.com/photo-1563212885-3bc67b36f7da?q=80&w=1600&auto=format&fit=crop",
-  curatorMarketplaceBgFilter: "brightness-25 blur-[2px]"
+  curatorMarketplaceBgFilter: "brightness-60 blur-[1px]"
 };
 
 // Latency tracking middleware to measure api speed

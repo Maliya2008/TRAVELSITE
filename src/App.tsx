@@ -31,9 +31,9 @@ const defaultSettings: SiteSettings = {
   theme: "dark",
   allowFadingAnimations: true,
   scenicWondersBgImage: "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?q=80&w=1600&auto=format&fit=crop",
-  scenicWondersBgFilter: "brightness-30 blur-[2px]",
+  scenicWondersBgFilter: "brightness-60 blur-[1px]",
   curatorMarketplaceBgImage: "https://images.unsplash.com/photo-1563212885-3bc67b36f7da?q=80&w=1600&auto=format&fit=crop",
-  curatorMarketplaceBgFilter: "brightness-25 blur-[2px]"
+  curatorMarketplaceBgFilter: "brightness-60 blur-[1px]"
 };
 
 export default function App() {
@@ -254,7 +254,7 @@ export default function App() {
               <section 
                 key={sectionId} 
                 id="landmarks-explore" 
-                className="space-y-8 text-left scroll-mt-24 relative p-6 md:p-10 rounded-3xl border border-white/5 overflow-hidden group/scenic"
+                className="space-y-8 text-left scroll-mt-24 relative isolate p-6 md:p-10 rounded-3xl border border-white/5 overflow-hidden group/scenic"
               >
                 {/* Background Shaded Image Layer with dynamic effects */}
                 {bgImage && (
@@ -266,8 +266,18 @@ export default function App() {
                       className={`w-full h-full object-cover transition-all duration-700 ${filterClass}`}
                     />
                     {/* Shadow Layer overlay representing high-end aesthetic styling */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-slate-950/90" />
+                    <div 
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: "linear-gradient(to top, var(--app-bg) 0%, rgba(2, 6, 23, 0.45) 50%, var(--app-bg) 100%)"
+                      }}
+                    />
+                    <div 
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: "linear-gradient(to right, var(--app-bg) 0%, rgba(2, 6, 23, 0.25) 50%, var(--app-bg) 100%)"
+                      }}
+                    />
                   </div>
                 )}
 
@@ -332,7 +342,7 @@ export default function App() {
               <section 
                 key={sectionId} 
                 id="guides-marketplace" 
-                className="space-y-8 text-left scroll-mt-24 relative p-6 md:p-10 rounded-3xl border border-white/5 overflow-hidden group/curator"
+                className="space-y-8 text-left scroll-mt-24 relative isolate p-6 md:p-10 rounded-3xl border border-white/5 overflow-hidden group/curator"
               >
                 {/* Background Shaded Image Layer with dynamic effects */}
                 {bgImage && (
@@ -344,8 +354,18 @@ export default function App() {
                       className={`w-full h-full object-cover transition-all duration-700 ${filterClass}`}
                     />
                     {/* Shadow Layer overlay representing high-end aesthetic styling */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-slate-950/90" />
+                    <div 
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: "linear-gradient(to top, var(--app-bg) 0%, rgba(2, 6, 23, 0.45) 50%, var(--app-bg) 100%)"
+                      }}
+                    />
+                    <div 
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: "linear-gradient(to right, var(--app-bg) 0%, rgba(2, 6, 23, 0.25) 50%, var(--app-bg) 100%)"
+                      }}
+                    />
                   </div>
                 )}
 
