@@ -193,6 +193,14 @@ export default function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated)
+    }).then(async (res) => {
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await res.json();
+        if (!data.success) {
+          console.error("Failed to persist theme settings:", data.error);
+        }
+      }
     }).catch(err => console.error("Error setting custom theme preference:", err));
   };
 

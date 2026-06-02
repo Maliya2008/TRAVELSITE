@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   Sliders, Compass, Mail, Lock, Server, Bot, Send, CheckCircle, 
   Trash2, Plus, ArrowUp, ArrowDown, Image, MapPin, 
-  UserPlus, ShieldCheck, LogOut, ArrowLeft, Loader2, AlertCircle, Sparkles
+  UserPlus, ShieldCheck, LogOut, ArrowLeft, Loader2, AlertCircle, Sparkles,
+  UploadCloud
 } from "lucide-react";
 import { Landmark, Guide, SiteSettings } from "../types";
 
@@ -83,11 +84,62 @@ export default function AdminPortal({
   const [guidePortfolioGallery, setGuidePortfolioGallery] = useState("");
 
   const [heroHoverImage, setHeroHoverImage] = useState<string>("");
+  const [activeSlideSlot, setActiveSlideSlot] = useState<number>(1);
+  const [activeBackdropSection, setActiveBackdropSection] = useState<"heroHover" | "scenic" | "curators">("heroHover");
+  const [uploadStatusMsg, setUploadStatusMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const val = localStorage.getItem("ceylonta_hero_hover_image") || "";
     setHeroHoverImage(val);
   }, []);
+
+  const triggerStatusNotice = (msg: string) => {
+    setUploadStatusMsg(msg);
+    setTimeout(() => {
+      setUploadStatusMsg((prev) => (prev === msg ? null : prev));
+    }, 6000);
+  };
+
+  const compressAndProcessImage = (file: File, callback: (base64: string) => void) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const srcStr = event.target?.result as string;
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 1600;
+        
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          callback(srcStr);
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+        callback(compressedBase64);
+      };
+      img.onerror = () => {
+        callback(srcStr);
+      };
+      img.src = srcStr;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleHeroHoverImageChange = (newVal: string) => {
     setHeroHoverImage(newVal);
@@ -102,33 +154,27 @@ export default function AdminPortal({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
+    triggerStatusNotice("Optimizing and applying local hover image...");
+    compressAndProcessImage(file, (base64) => {
       handleHeroHoverImageChange(base64);
-    };
-    reader.readAsDataURL(file);
+      triggerStatusNotice("✓ Hover Illustration uploaded and applied successfully!");
+    });
   };
 
   const uploadBackdropFile = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const b64 = reader.result as string;
-      if (index === 1) {
-        saveSettings({ ...settings, heroBgImage: b64 });
-      } else if (index === 2) {
-        saveSettings({ ...settings, heroBgImage2: b64 });
-      } else if (index === 3) {
-        saveSettings({ ...settings, heroBgImage3: b64 });
-      } else if (index === 4) {
-        saveSettings({ ...settings, heroBgImage4: b64 });
-      } else if (index === 5) {
-        saveSettings({ ...settings, heroBgImage5: b64 });
-      }
-    };
-    reader.readAsDataURL(file);
+    triggerStatusNotice(`Compiling custom backdrop for Slider Slot ${index}...`);
+    compressAndProcessImage(file, (b64) => {
+      const updated = { ...settings };
+      if (index === 1) updated.heroBgImage = b64;
+      else if (index === 2) updated.heroBgImage2 = b64;
+      else if (index === 3) updated.heroBgImage3 = b64;
+      else if (index === 4) updated.heroBgImage4 = b64;
+      else if (index === 5) updated.heroBgImage5 = b64;
+      saveSettings(updated);
+      triggerStatusNotice(`✓ Slide Slot ${index} backdrop loaded successfully!`);
+    });
   };
 
   const uploadMultipleBackdrops = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,15 +182,14 @@ export default function AdminPortal({
     if (!files || files.length === 0) return;
     
     const count = Math.min(files.length, 5);
+    triggerStatusNotice(`Processing ${count} slide backdrops...`);
     const updatedSettings = { ...settings };
     
     let processed = 0;
     for (let i = 0; i < count; i++) {
-      const reader = new FileReader();
-      const currentIdx = i + 1;
       const file = files[i];
-      reader.onloadend = () => {
-        const b64 = reader.result as string;
+      const currentIdx = i + 1;
+      compressAndProcessImage(file, (b64) => {
         if (currentIdx === 1) updatedSettings.heroBgImage = b64;
         else if (currentIdx === 2) updatedSettings.heroBgImage2 = b64;
         else if (currentIdx === 3) updatedSettings.heroBgImage3 = b64;
@@ -154,50 +199,50 @@ export default function AdminPortal({
         processed++;
         if (processed === count) {
           saveSettings(updatedSettings);
+          triggerStatusNotice("✓ Multi-image library updated successfully!");
         }
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 
   const uploadScenicWondersBg = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      saveSettings({ ...settings, scenicWondersBgImage: reader.result as string });
-    };
-    reader.readAsDataURL(file);
+    triggerStatusNotice("Optimizing Majestic Havens backdrop style...");
+    compressAndProcessImage(file, (b64) => {
+      saveSettings({ ...settings, scenicWondersBgImage: b64 });
+      triggerStatusNotice("✓ Scenic Wonders Section Backdrop updated successfully!");
+    });
   };
 
   const uploadCuratorMarketplaceBg = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      saveSettings({ ...settings, curatorMarketplaceBgImage: reader.result as string });
-    };
-    reader.readAsDataURL(file);
+    triggerStatusNotice("Optimizing Guide Curators backdrop style...");
+    compressAndProcessImage(file, (b64) => {
+      saveSettings({ ...settings, curatorMarketplaceBgImage: b64 });
+      triggerStatusNotice("✓ Curators Section Backdrop updated successfully!");
+    });
   };
 
   const uploadPlaceImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPlaceImage(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    triggerStatusNotice("Processing custom landmark image...");
+    compressAndProcessImage(file, (b64) => {
+      setPlaceImage(b64);
+      triggerStatusNotice("✓ Landmark file processed successfully!");
+    });
   };
 
   const uploadGuideAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setGuideAvatar(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    triggerStatusNotice("Processing curator avatar...");
+    compressAndProcessImage(file, (b64) => {
+      setGuideAvatar(b64);
+      triggerStatusNotice("✓ Avatar processed successfully!");
+    });
   };
 
   const uploadGuideGalleryFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,22 +250,22 @@ export default function AdminPortal({
     if (!files || files.length === 0) return;
     
     const count = files.length;
+    triggerStatusNotice(`Compiling ${count} collection slides...`);
     const results: string[] = [];
     let processed = 0;
     
     for (let i = 0; i < count; i++) {
-      const reader = new FileReader();
       const file = files[i];
-      reader.onloadend = () => {
-        results.push(reader.result as string);
+      compressAndProcessImage(file, (b64) => {
+        results.push(b64);
         processed++;
         if (processed === count) {
           const existing = guidePortfolioGallery ? guidePortfolioGallery.split(",").filter(Boolean) : [];
           const combined = [...existing, ...results].join(",");
           setGuidePortfolioGallery(combined);
+          triggerStatusNotice("✓ Gallery portfolio images added successfully!");
         }
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 
@@ -306,12 +351,28 @@ export default function AdminPortal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
       });
-      const json = await res.json();
-      if (json.success) {
-        onUpdateSettings(json.data);
+      
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const json = await res.json();
+        if (json.success) {
+          onUpdateSettings(json.data);
+        } else {
+          console.error("Failed to save settings:", json.error);
+          alert(`Configuration Error: ${json.error || "Failed to persist configuration state on the server."}`);
+        }
+      } else {
+        const text = await res.text();
+        console.error("Server returned non-JSON response:", text);
+        if (res.status === 413) {
+          alert("Image is too large! Please upload a compressed image or paste a quick Unsplash media link instead.");
+        } else {
+          alert(`Server Error (${res.status}): The administration portal could not process the configuration backup.`);
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to persist site settings:", err);
+      alert(`Network Error: Could not establish a communication channel. ${err.message || err}`);
     }
   };
 
@@ -549,8 +610,26 @@ export default function AdminPortal({
         </div>
       ) : (
         /* RENDER STAGE 2: ADMINISTRATIVE WIDESCREEN CMS WORKSPACE */
-        <div className="flex-grow flex flex-col p-4 md:p-8">
+        <div className="flex-grow flex flex-col p-4 md:p-8 relative">
           
+          {/* Stunning floating upload feedback notice overlay */}
+          <AnimatePresence>
+            {uploadStatusMsg && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                className="fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-4 bg-slate-900/95 backdrop-blur-xl border border-golden/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.6),0_0_20px_rgba(245,158,11,0.15)] text-xs font-mono font-semibold text-golden flex items-center gap-3 w-fit max-w-md text-left"
+              >
+                <div className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-golden opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-golden"></span>
+                </div>
+                <span>{uploadStatusMsg}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Header Bar */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 bg-slate-900 border border-white/10 rounded-2xl mb-6 shadow-md text-left">
             <div className="flex items-center gap-3">
@@ -651,9 +730,9 @@ export default function AdminPortal({
                   </span>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
+                    <div className="space-y-4 text-left">
                       <div>
-                        <label className="text-[10px] font-mono text-slate-400 block mb-1 font-bold uppercase">Display Title Text</label>
+                        <label className="text-xs font-mono text-slate-300 block mb-1.5 font-bold uppercase tracking-wider">Display Title Text</label>
                         <input
                           type="text"
                           value={settings.heroTitle}
@@ -663,7 +742,7 @@ export default function AdminPortal({
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-mono text-slate-400 block mb-1 font-bold uppercase">Golden Subtitle Caption</label>
+                        <label className="text-xs font-mono text-slate-300 block mb-1.5 font-bold uppercase tracking-wider">Golden Subtitle Caption</label>
                         <input
                           type="text"
                           value={settings.heroSubtitle}
@@ -671,143 +750,11 @@ export default function AdminPortal({
                           className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-golden transition-all"
                         />
                       </div>
-
-                      {/* Batch Cover Backdrop Uploader */}
-                      <div className="p-4 border border-dashed border-golden/35 rounded-2xl bg-slate-950/80 text-center relative group space-y-2 mt-4 mb-2">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={uploadMultipleBackdrops}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                        />
-                        <div className="text-xs font-mono text-golden uppercase tracking-wider font-bold flex items-center justify-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-golden animate-pulse" /> Batch Upload Cover Images (Select Multiple)
-                        </div>
-                        <p className="text-[10px] text-slate-300 leading-normal max-w-lg mx-auto">
-                          Select up to 5 local scenic images from your PC (e.g. dawn, dusk, night etc) to auto-fill all slot files at once!
-                        </p>
-                        <span className="text-[9px] text-slate-500 font-mono uppercase tracking-widest block font-bold">
-                          Click or drag multiple files to fill slot 1 to 5
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
-                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 1</label>
-                          <input
-                            type="text"
-                            value={settings.heroBgImage}
-                            onChange={(e) => saveSettings({ ...settings, heroBgImage: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
-                            placeholder="Image URL"
-                          />
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => uploadBackdropFile(1, e)}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.heroBgImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
-                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 2</label>
-                          <input
-                            type="text"
-                            value={settings.heroBgImage2 || ""}
-                            onChange={(e) => saveSettings({ ...settings, heroBgImage2: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
-                            placeholder="Image URL"
-                          />
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => uploadBackdropFile(2, e)}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.heroBgImage2?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
-                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 3</label>
-                          <input
-                            type="text"
-                            value={settings.heroBgImage3 || ""}
-                            onChange={(e) => saveSettings({ ...settings, heroBgImage3: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
-                            placeholder="Image URL"
-                          />
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => uploadBackdropFile(3, e)}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.heroBgImage3?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
-                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 4</label>
-                          <input
-                            type="text"
-                            value={settings.heroBgImage4 || ""}
-                            onChange={(e) => saveSettings({ ...settings, heroBgImage4: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
-                            placeholder="Image URL"
-                          />
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => uploadBackdropFile(4, e)}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.heroBgImage4?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2 text-left">
-                          <label className="text-[10px] font-mono text-slate-400 block font-bold uppercase">Cover Backdrop Image 5</label>
-                          <input
-                            type="text"
-                            value={settings.heroBgImage5 || ""}
-                            onChange={(e) => saveSettings({ ...settings, heroBgImage5: e.target.value })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-[10px] text-slate-300 focus:outline-none focus:border-golden font-mono transition-all"
-                            placeholder="Image URL"
-                          />
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => uploadBackdropFile(5, e)}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/20 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.heroBgImage5?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local File..."}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4 text-left">
                       <div>
-                        <label className="text-[10px] font-mono text-slate-400 block mb-1">Atmosphere Narrative Block</label>
+                        <label className="text-xs font-mono text-slate-300 block mb-1.5 font-bold uppercase tracking-wider">Atmosphere Narrative Block</label>
                         <textarea
                           rows={4}
                           value={settings.heroDescription}
@@ -816,9 +763,9 @@ export default function AdminPortal({
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-[10px] font-mono text-slate-400 block mb-1">Fade (Sec)</label>
+                          <label className="text-xs font-mono text-slate-300 block mb-1.5 font-bold uppercase tracking-wider">Fade (Sec)</label>
                           <input
                             type="number"
                             step="0.1"
@@ -826,19 +773,181 @@ export default function AdminPortal({
                             max="5"
                             value={settings.heroBgFadeDuration}
                             onChange={(e) => saveSettings({ ...settings, heroBgFadeDuration: parseFloat(e.target.value) })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none"
+                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:outline-none"
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] font-mono text-slate-400 block mb-1">Blur Pixels</label>
+                          <label className="text-xs font-mono text-slate-300 block mb-1.5 font-bold uppercase tracking-wider">Blur Pixels</label>
                           <input
                             type="number"
                             min="0"
                             max="20"
                             value={settings.heroBgBlur}
                             onChange={(e) => saveSettings({ ...settings, heroBgBlur: parseInt(e.target.value) })}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none"
+                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:outline-none"
                           />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/10 pt-6 mt-6" />
+
+                  <div className="space-y-6">
+                    <div className="text-left">
+                      <span className="text-xs font-mono uppercase tracking-widest text-golden font-bold block">
+                        Cover Background Slide Library
+                      </span>
+                      <p className="text-xs text-slate-400 mt-1 leading-normal">
+                        Select an individual slide slot below to configure its backdrop image. Slides automatically cross-fade in the homepage Hero section every 10 seconds.
+                      </p>
+                    </div>
+
+                    {/* Interactive Slide Thumbnail Strip */}
+                    <div className="grid grid-cols-5 gap-3">
+                      {[1, 2, 3, 4, 5].map((num) => {
+                        const img =
+                          num === 1
+                            ? settings.heroBgImage
+                            : num === 2
+                            ? settings.heroBgImage2
+                            : num === 3
+                            ? settings.heroBgImage3
+                            : num === 4
+                            ? settings.heroBgImage4
+                            : settings.heroBgImage5;
+
+                        const isSelected = activeSlideSlot === num;
+
+                        return (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setActiveSlideSlot(num)}
+                            className={`relative aspect-[16/10] rounded-xl overflow-hidden border-2 transition-all duration-300 group cursor-pointer text-left ${
+                              isSelected
+                                ? "border-golden shadow-[0_0_12px_rgba(245,158,11,0.25)] scale-[1.02]"
+                                : "border-white/5 hover:border-white/20 hover:scale-[1.01]"
+                            }`}
+                          >
+                            {img ? (
+                              <img
+                                src={img}
+                                alt={`Slot ${num}`}
+                                referrerPolicy="no-referrer"
+                                className="w-full h-full object-cover brightness-[0.35] group-hover:brightness-[0.5] transition-all duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-slate-950 flex items-center justify-center font-mono text-[10px] text-slate-500">
+                                Empty {num}
+                              </div>
+                            )}
+                            
+                            <div className="absolute inset-0 p-2 flex flex-col justify-between">
+                              <span className="text-[9px] font-mono uppercase bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-white font-bold inline-block w-fit">
+                                Slot {num}
+                              </span>
+                              {img && (
+                                <span className="text-[8px] font-mono text-emerald-400 bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded-sm w-fit inline-block font-bold">
+                                  ACTIVE
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Focused Active Slide Editor Panel */}
+                    <div className="bg-slate-950/50 p-5 rounded-xl border border-white/5 space-y-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4 text-left">
+                        <div>
+                          <span className="text-xs font-mono uppercase tracking-wider text-golden font-bold block">
+                            Active Slot Configurator — Slide {activeSlideSlot}
+                          </span>
+                          <p className="text-xs text-slate-400 mt-1 leading-normal">
+                            Edit URL or upload a custom image file for Slide {activeSlideSlot} to display in the main Hero rotation.
+                          </p>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-[10px] font-mono uppercase bg-slate-900 border border-white/10 px-2.5 py-1 rounded-md text-slate-400 font-bold">
+                            Source: {(() => {
+                              const img = activeSlideSlot === 1 ? settings.heroBgImage : activeSlideSlot === 2 ? settings.heroBgImage2 : activeSlideSlot === 3 ? settings.heroBgImage3 : activeSlideSlot === 4 ? settings.heroBgImage4 : settings.heroBgImage5;
+                              if (!img) return "Not Configured";
+                              return img.startsWith("data:") ? "Local Base64" : "Web URL";
+                            })()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-left">
+                        {/* Inputs Column */}
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Backdrop Image URL</label>
+                            <input
+                              type="text"
+                              value={(() => {
+                                const val = activeSlideSlot === 1 ? settings.heroBgImage : activeSlideSlot === 2 ? settings.heroBgImage2 : activeSlideSlot === 3 ? settings.heroBgImage3 : activeSlideSlot === 4 ? settings.heroBgImage4 : settings.heroBgImage5;
+                                return val || "";
+                              })()}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (activeSlideSlot === 1) saveSettings({ ...settings, heroBgImage: val });
+                                else if (activeSlideSlot === 2) saveSettings({ ...settings, heroBgImage2: val });
+                                else if (activeSlideSlot === 3) saveSettings({ ...settings, heroBgImage3: val });
+                                else if (activeSlideSlot === 4) saveSettings({ ...settings, heroBgImage4: val });
+                                else if (activeSlideSlot === 5) saveSettings({ ...settings, heroBgImage5: val });
+                              }}
+                              className="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 font-mono focus:outline-none focus:border-golden transition-all"
+                              placeholder="https://images.unsplash.com/photo-..."
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">Local Computer Upload</label>
+                            <div className="relative overflow-hidden bg-slate-900 border border-dashed border-white/10 hover:border-golden/40 rounded-xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[120px] group">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => uploadBackdropFile(activeSlideSlot, e)}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                              />
+                              <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-golden transition-colors mb-2" />
+                              <span className="text-xs uppercase font-mono font-bold text-golden block select-none">
+                                Choose or drag local file
+                              </span>
+                              <span className="text-[10px] text-slate-500 block mt-1 font-sans select-none">
+                                Optimizes and saves directly to local storage state.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Visual Asset Preview */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block">Aspect Render Preview</label>
+                          <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-white/10 bg-slate-950 flex items-center justify-center">
+                            {(() => {
+                              const img = activeSlideSlot === 1 ? settings.heroBgImage : activeSlideSlot === 2 ? settings.heroBgImage2 : activeSlideSlot === 3 ? settings.heroBgImage3 : activeSlideSlot === 4 ? settings.heroBgImage4 : settings.heroBgImage5;
+                              if (img) {
+                                return (
+                                  <img
+                                    src={img}
+                                    alt={`Active slot preview`}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover object-center"
+                                  />
+                                );
+                              }
+                              return (
+                                <div className="text-center p-4">
+                                  <Image className="w-8 h-8 text-white/10 mx-auto mb-2" />
+                                  <span className="text-xs text-slate-500 font-mono">No Image Configured</span>
+                                </div>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -851,192 +960,367 @@ export default function AdminPortal({
                     <span className="text-xs uppercase tracking-widest text-golden font-mono font-bold">
                       Premium Section Ambient Backdrops & Uploads
                     </span>
-                    <p className="text-[11px] text-slate-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1 leading-normal text-left">
                       Configure dynamic visual backdrops, customizable filter effects, and local storage asset uploads.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Segment Switcher Tab List */}
+                  <div className="grid grid-cols-3 bg-slate-950 border border-white/5 rounded-xl p-1 gap-1 text-center font-mono text-[10px] text-slate-400">
+                    {[
+                      { id: "heroHover", label: "Hero Hover Illustration" },
+                      { id: "scenic", label: "Scenic Wonders Stage Backdrop" },
+                      { id: "curators", label: "Curators Stage Backdrop" }
+                    ].map((sec) => {
+                      const isActive = activeBackdropSection === sec.id;
+                      return (
+                        <button
+                          key={sec.id}
+                          type="button"
+                          onClick={() => setActiveBackdropSection(sec.id as any)}
+                          className={`py-2 px-1.5 rounded-lg transition-all cursor-pointer font-bold ${
+                            isActive
+                              ? "bg-golden/10 border border-golden/30 text-golden"
+                              : "hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          {sec.label}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                    {/* Local Storage Anime.js Hero Hover Image Upload */}
-                    <div className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-4">
-                      <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold block mb-1">
-                          Hero Hover Image (anime.js Card)
-                        </span>
-                        <p className="text-[10px] text-slate-400">
-                          This image triggers a 3D responsive interactive float on hover inside the main Hero section.
-                        </p>
-                      </div>
-
-                      {/* File select uploader representing local storage persistence */}
-                      <div className="space-y-3">
-                        <div className="p-4 border border-dashed border-white/10 rounded-xl text-center bg-slate-900/50 hover:bg-slate-900 transition-all cursor-pointer relative group">
-                          <input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={handleFileUpload}
-                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                          />
-                          <span className="text-[10px] uppercase font-mono text-golden block font-bold transition-transform group-hover:scale-105">
-                            Upload Local File (Base64)
-                          </span>
-                          <span className="text-[9px] text-slate-500 block mt-1">
-                            Drag & drop or click to choose
-                          </span>
-                        </div>
-
+                  {activeBackdropSection === "heroHover" && (
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3 text-left">
                         <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Or Paste Image URL</label>
-                          <input 
-                            type="text"
-                            value={heroHoverImage && heroHoverImage.startsWith("data:") ? "[Uploaded base64 asset]" : heroHoverImage}
-                            onChange={(e) => handleHeroHoverImageChange(e.target.value)}
-                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
-                            placeholder="https://images.unsplash.com/..."
-                          />
+                          <span className="text-xs font-mono uppercase tracking-wider text-golden font-bold block">
+                            Hero Hover Image Configurator
+                          </span>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-normal">
+                            This image triggers a 3D responsive floating effect upon hover over the home page Hero spotlight.
+                          </p>
                         </div>
-
                         {heroHoverImage && (
-                          <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                            <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
-                              ● COMMITTED TO LOCAL STORAGE
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold">
+                              {heroHoverImage.startsWith("data:") ? "Local Base64 File" : "Custom Web URL"}
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => handleHeroHoverImageChange("")}
-                              className="text-[9px] font-mono text-red-400 hover:text-red-300 hover:underline"
-                            >
-                              Reset to Default
-                            </button>
                           </div>
                         )}
                       </div>
-                    </div>
 
-                    {/* Scenic Wonders Shaded Background and Filter Effect */}
-                    <div className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-4">
-                      <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold block mb-1">
-                          Scenic Wonders Backdrop
-                        </span>
-                        <p className="text-[10px] text-slate-400">
-                          Set the background image and dynamic shaded filter effect applied underneath the landmarks section.
-                        </p>
-                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-left">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Image Web URL</label>
+                            {heroHoverImage?.startsWith("data:") ? (
+                              <div className="flex items-center justify-between bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-400 font-mono">
+                                <span className="text-emerald-400 flex items-center gap-1.5 font-bold">
+                                  ● Local File Active
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleHeroHoverImageChange("")}
+                                  className="text-[10px] uppercase bg-rose-950/40 hover:bg-rose-900 border border-rose-900/30 text-rose-300 font-bold px-2 py-1 rounded"
+                                >
+                                  Clear / Reset
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <input 
+                                  type="text"
+                                  value={heroHoverImage || ""}
+                                  onChange={(e) => handleHeroHoverImageChange(e.target.value)}
+                                  className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs font-mono text-slate-200 placeholder-slate-650 focus:outline-none focus:border-golden transition-all"
+                                  placeholder="https://images.unsplash.com/photo-..."
+                                />
+                                {heroHoverImage && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleHeroHoverImageChange("")}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] uppercase bg-slate-900 border border-white/10 text-slate-400 font-bold px-2 py-1 rounded hover:text-white"
+                                  >
+                                    Reset
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
 
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Backdrop Image URL</label>
-                          <input 
-                            type="text"
-                            value={settings.scenicWondersBgImage || ""}
-                            onChange={(e) => saveSettings({ ...settings, scenicWondersBgImage: e.target.value })}
-                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
-                            placeholder="https://images.unsplash.com/..."
-                          />
-                          <div className="relative mt-1.5">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={uploadScenicWondersBg}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.scenicWondersBgImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
+                          <div className="space-y-2">
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">Local Computer Upload</label>
+                            <div className="relative overflow-hidden bg-slate-950 border border-dashed border-white/10 hover:border-golden/40 rounded-xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[120px] group">
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                              />
+                              <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-golden transition-colors mb-2" />
+                              <span className="text-xs uppercase font-mono font-bold text-golden block select-none">
+                                Choose local illustration
+                              </span>
+                              <span className="text-[10px] text-slate-500 block mt-1 font-sans select-none">
+                                Saves directly to browser local storage state.
+                              </span>
                             </div>
                           </div>
                         </div>
 
-                        <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Atmospheric Effect Presets</label>
-                          <select 
-                            value={settings.scenicWondersBgFilter || "brightness-30 blur-[2px]"}
-                            onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
-                            className="w-full bg-slate-900 border border-white/5 text-slate-300 text-xs rounded-lg p-2 focus:outline-none"
-                          >
-                            <option value="brightness-30 blur-[2px]">Classic Deep Shaded (Dark & Blurred)</option>
-                            <option value="brightness-[0.22] saturate-[1.3] hue-rotate-15 blur-[1px]">Forest Mystique (High Saturation Emerald)</option>
-                            <option value="brightness-[0.18] contrast-125 sepia blur-sm">Ancient Scroll (Historical Sepia Tone)</option>
-                            <option value="brightness-20 grayscale blur-[2px]">Gothic Monumental (High Contrast Slate)</option>
-                            <option value="brightness-100 blur-0">Raw Image (No Shading Overlay)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Raw CSS Filter Classes</label>
-                          <input 
-                            type="text"
-                            value={settings.scenicWondersBgFilter || ""}
-                            onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
-                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-emerald-400 focus:outline-none focus:border-golden"
-                          />
+                        <div className="space-y-2">
+                          <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block">3D Interactive Float Card Replica</label>
+                          <div className="relative aspect-[4/5] max-w-[200px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-slate-950 flex flex-col items-center justify-center p-4 text-center group shadow-2xl transition-all duration-300 hover:scale-[1.03]">
+                            {heroHoverImage ? (
+                              <>
+                                <img
+                                  src={heroHoverImage}
+                                  alt="Hero card preview"
+                                  referrerPolicy="no-referrer"
+                                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/20" />
+                                <div className="absolute bottom-4 left-4 right-4 text-left z-10">
+                                  <span className="text-[8px] font-mono text-golden font-bold uppercase">ROYAL CHARTER</span>
+                                  <h4 className="text-xs font-serif font-bold text-white mt-0.5">Interactive Canvas</h4>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-center p-4">
+                                <Image className="w-8 h-8 text-white/10 mx-auto mb-2 animate-pulse" />
+                                <span className="text-xs text-slate-500 font-mono">No Active Asset</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )}
 
-                    {/* Curators Marketplace Shaded Background and Filter Effect */}
-                    <div className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-4">
-                      <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-golden font-bold block mb-1">
-                          Curators Marketplace Backdrop
-                        </span>
-                        <p className="text-[10px] text-slate-400">
-                          Customize the shaded background image and ambient effects rendered beneath the guide curators list.
-                        </p>
+                  {activeBackdropSection === "scenic" && (
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3 text-left">
+                        <div>
+                          <span className="text-xs font-mono uppercase tracking-wider text-golden font-bold block">
+                            Scenic Wonders Section Backdrop
+                          </span>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-normal">
+                            Set the background image and dynamic shaded filter effects rendered underneath the Majestic Havens landmarks list.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => saveSettings({ ...settings, scenicWondersBgImage: "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?q=80&w=1600&auto=format&fit=crop" })}
+                            className="text-[10px] uppercase font-mono px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-900 border border-white/10 text-slate-400 hover:text-white font-bold cursor-pointer"
+                          >
+                            Revert To Default
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Backdrop Image URL</label>
-                          <input 
-                            type="text"
-                            value={settings.curatorMarketplaceBgImage || ""}
-                            onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgImage: e.target.value })}
-                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-golden"
-                            placeholder="https://images.unsplash.com/..."
-                          />
-                          <div className="relative mt-1.5">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={uploadCuratorMarketplaceBg}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-left">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Backdrop Image URL</label>
+                            <input 
+                              type="text"
+                              value={settings.scenicWondersBgImage || ""}
+                              onChange={(e) => saveSettings({ ...settings, scenicWondersBgImage: e.target.value })}
+                              className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-golden transition-all"
+                              placeholder="https://images.unsplash.com/..."
                             />
-                            <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-900 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
-                              {settings.curatorMarketplaceBgImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Atmospheric Preset</label>
+                              <select 
+                                value={settings.scenicWondersBgFilter || "brightness-30 blur-[2px]"}
+                                onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
+                                className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded-xl p-2.5 focus:outline-none transition-all cursor-pointer bg-slate-900"
+                              >
+                                <option value="brightness-30 blur-[2px]">Classic Deep Shaded</option>
+                                <option value="brightness-[0.22] saturate-[1.3] hue-rotate-15 blur-[1px]">Forest Mystique (Emerald)</option>
+                                <option value="brightness-[0.18] contrast-125 sepia blur-sm">Ancient Scroll (Sepia)</option>
+                                <option value="brightness-20 grayscale blur-[2px]">Gothic Monumental</option>
+                                <option value="brightness-100 blur-0">Raw Image (No Shading)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Raw CSS Filter Classes</label>
+                              <input 
+                                type="text"
+                                value={settings.scenicWondersBgFilter || ""}
+                                onChange={(e) => saveSettings({ ...settings, scenicWondersBgFilter: e.target.value })}
+                                className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs font-mono text-emerald-400 focus:outline-none focus:border-golden transition-all"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">Local Computer Upload</label>
+                            <div className="relative overflow-hidden bg-slate-950 border border-dashed border-white/10 hover:border-golden/40 rounded-xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[120px] group">
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={uploadScenicWondersBg}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                              />
+                              <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-golden transition-colors mb-2" />
+                              <span className="text-xs uppercase font-mono font-bold text-golden block select-none">
+                                Choose scenic file (Base64)
+                              </span>
+                              <span className="text-[10px] text-slate-500 block mt-1 font-sans select-none">
+                                Saves securely as site state base64 image layer.
+                              </span>
                             </div>
                           </div>
                         </div>
 
-                        <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Atmospheric Effect Presets</label>
-                          <select 
-                            value={settings.curatorMarketplaceBgFilter || "brightness-25 blur-[2px]"}
-                            onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
-                            className="w-full bg-slate-900 border border-white/5 text-slate-300 text-xs rounded-lg p-2 focus:outline-none"
-                          >
-                            <option value="brightness-25 blur-[2px]">Classic Deep Shaded (Dark & Blurred)</option>
-                            <option value="brightness-20 saturate-[1.3] contrast-125 blur-[1px]">Ocean Blue (Rich Contrast Marine)</option>
-                            <option value="brightness-[0.15] sepia-[0.35] saturate-150 blur-sm">Warm Amber Safari (Sun-kissed Savanna)</option>
-                            <option value="brightness-15 grayscale blur-[2px]">Gravel Ash (Monochrome Slate)</option>
-                            <option value="brightness-100 blur-0">Raw Image (No Shading Overlay)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-[9px] font-mono text-slate-400 block mb-1 uppercase font-semibold">Raw CSS Filter Classes</label>
-                          <input 
-                            type="text"
-                            value={settings.curatorMarketplaceBgFilter || ""}
-                            onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
-                            className="w-full bg-slate-900 border border-white/5 rounded-lg p-2.5 text-[10px] font-mono text-emerald-400 focus:outline-none focus:border-golden"
-                          />
+                        <div className="space-y-2">
+                          <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block">Atmospheric Aspect Preview</label>
+                          <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 bg-slate-950 flex items-center justify-center group shadow-xl">
+                            {settings.scenicWondersBgImage ? (
+                              <div className="absolute inset-0 w-full h-full overflow-hidden">
+                                <img
+                                  src={settings.scenicWondersBgImage}
+                                  alt="Scenic backdrop preview"
+                                  referrerPolicy="no-referrer"
+                                  className={`w-full h-full object-cover transition-all duration-300 ${settings.scenicWondersBgFilter || "brightness-30 blur-[2px]"}`}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
+                              </div>
+                            ) : (
+                              <div className="text-center p-4">
+                                <Image className="w-8 h-8 text-white/10 mx-auto mb-2" />
+                                <span className="text-xs text-slate-500 font-mono">No Image Configured</span>
+                              </div>
+                            )}
+                            <div className="absolute bottom-3 left-4 z-10">
+                              <span className="text-[9px] font-mono tracking-wide text-golden uppercase bg-slate-950/80 px-2 py-0.5 rounded-md border border-white/10">
+                                Landmarks Section Simulation
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )}
 
-                  </div>
+                  {activeBackdropSection === "curators" && (
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3 text-left">
+                        <div>
+                          <span className="text-xs font-mono uppercase tracking-wider text-golden font-bold block">
+                            Curators Section Backdrop
+                          </span>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-normal">
+                            Set the background image and dynamic shaded filter effects rendered underneath the guide curators list.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => saveSettings({ ...settings, curatorMarketplaceBgImage: "https://images.unsplash.com/photo-1563212885-3bc67b36f7da?q=80&w=1600&auto=format&fit=crop" })}
+                            className="text-[10px] uppercase font-mono px-2.5 py-1 rounded bg-slate-950 hover:bg-slate-900 border border-white/10 text-slate-400 hover:text-white font-bold cursor-pointer"
+                          >
+                            Revert To Default
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-left">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Backdrop Image URL</label>
+                            <input 
+                              type="text"
+                              value={settings.curatorMarketplaceBgImage || ""}
+                              onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgImage: e.target.value })}
+                              className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-golden transition-all"
+                              placeholder="https://images.unsplash.com/..."
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Atmospheric Preset</label>
+                              <select 
+                                value={settings.curatorMarketplaceBgFilter || "brightness-25 blur-[2px]"}
+                                onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
+                                className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded-xl p-2.5 focus:outline-none transition-all cursor-pointer bg-slate-900"
+                              >
+                                <option value="brightness-25 blur-[2px]">Classic Deep Shaded</option>
+                                <option value="brightness-20 saturate-[1.3] contrast-125 blur-[1px]">Ocean Blue (Marine Contrast)</option>
+                                <option value="brightness-[0.15] sepia-[0.35] saturate-150 blur-sm">Warm Amber Safari (Savanna)</option>
+                                <option value="brightness-15 grayscale blur-[2px]">Gravel Ash (Monochrome Slate)</option>
+                                <option value="brightness-100 blur-0">Raw Image (No Shading Overlay)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1.5">Raw CSS Filter Classes</label>
+                              <input 
+                                type="text"
+                                value={settings.curatorMarketplaceBgFilter || ""}
+                                onChange={(e) => saveSettings({ ...settings, curatorMarketplaceBgFilter: e.target.value })}
+                                className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs font-mono text-emerald-400 focus:outline-none focus:border-golden transition-all"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block mb-1">Local Computer Upload</label>
+                            <div className="relative overflow-hidden bg-slate-950 border border-dashed border-white/10 hover:border-golden/40 rounded-xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[120px] group">
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={uploadCuratorMarketplaceBg}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                              />
+                              <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-golden transition-colors mb-2" />
+                              <span className="text-xs uppercase font-mono font-bold text-golden block select-none">
+                                Choose scenic file (Base64)
+                              </span>
+                              <span className="text-[10px] text-slate-500 block mt-1 font-sans select-none">
+                                Saves securely as site state base64 image layer.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block">Atmospheric Aspect Preview</label>
+                          <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 bg-slate-950 flex items-center justify-center group shadow-xl">
+                            {settings.curatorMarketplaceBgImage ? (
+                              <div className="absolute inset-0 w-full h-full overflow-hidden">
+                                <img
+                                  src={settings.curatorMarketplaceBgImage}
+                                  alt="Curator backdrop preview"
+                                  referrerPolicy="no-referrer"
+                                  className={`w-full h-full object-cover transition-all duration-305 ${settings.curatorMarketplaceBgFilter || "brightness-25 blur-[2px]"}`}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
+                              </div>
+                            ) : (
+                              <div className="text-center p-4">
+                                <Image className="w-8 h-8 text-white/10 mx-auto mb-2" />
+                                <span className="text-xs text-slate-500 font-mono">No Image Configured</span>
+                              </div>
+                            )}
+                            <div className="absolute bottom-3 left-4 z-10">
+                              <span className="text-[9px] font-mono tracking-wide text-golden uppercase bg-slate-950/80 px-2 py-0.5 rounded-md border border-white/10">
+                                Curators Section Simulation
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Section Arrange and Footer Settings */}
@@ -1185,36 +1469,36 @@ export default function AdminPortal({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div className="space-y-3">
                       <div>
-                        <label className="text-[9px] font-mono text-slate-500 block mb-1 uppercase font-bold">Destinations Place Name</label>
+                        <label className="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold tracking-wider">Destinations Place Name</label>
                         <input
                           type="text"
                           required
                           value={placeName}
                           onChange={(e) => setPlaceName(e.target.value)}
                           placeholder="Knuckles Range Ridge"
-                          className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white transition-all"
+                          className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white text-xs transition-all"
                         />
                       </div>
 
                       <div>
-                        <label className="text-[9px] font-mono text-slate-500 block mb-1 uppercase font-bold">Scenic Display Tagline</label>
+                        <label className="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold tracking-wider">Scenic Display Tagline</label>
                         <input
                           type="text"
                           value={placeTagline}
                           onChange={(e) => setPlaceTagline(e.target.value)}
                           placeholder="Misty valleys in the clouds"
-                          className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white transition-all"
+                          className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white text-xs transition-all"
                         />
                       </div>
 
                        <div>
-                        <label className="text-[9px] font-mono text-slate-500 block mb-1 uppercase font-bold">Main Banner Landscape Photo URL</label>
+                        <label className="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold tracking-wider">Main Banner Landscape Photo URL</label>
                         <input
                           type="text"
                           value={placeImage}
                           onChange={(e) => setPlaceImage(e.target.value)}
                           placeholder="https://images.unsplash.com/..."
-                          className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white font-mono text-[11px] transition-all"
+                          className="w-full bg-slate-950 border border-white/10 focus:border-golden/40 p-3 rounded-xl focus:outline-none text-white font-mono text-xs transition-all"
                         />
                         <div className="relative mt-1.5">
                           <input
@@ -1223,7 +1507,7 @@ export default function AdminPortal({
                             onChange={uploadPlaceImage}
                             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                           />
-                          <div className="py-1.5 px-2 rounded-lg border border-dashed border-white/10 text-center bg-slate-950 hover:bg-slate-800 text-[9px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
+                          <div className="py-2 px-3 rounded-lg border border-dashed border-white/15 text-center bg-slate-950 hover:bg-slate-800 text-[10px] font-mono text-golden hover:text-white font-semibold transition-colors cursor-pointer">
                             {placeImage?.startsWith("data:") ? "✓ base64 loaded" : "Upload Local Image..."}
                           </div>
                         </div>

@@ -12,7 +12,22 @@ import { Booking, BookingStatus } from "./src/types";
 
 // Setup server
 const app = express();
-app.use(express.json());
+
+// Increase JSON and URLencoded limits to support large image uploads easily (e.g., Base64 images)
+app.use(express.json({ limit: "150mb" }));
+app.use(express.urlencoded({ limit: "150mb", extended: true }));
+
+// Error handling middleware to catch body parser failures (like PayloadTooLargeError)
+// and return a clean JSON error response instead of the default Express HTML error page
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err && (err.type === "entity.too.large" || err.status === 413 || err.name === "PayloadTooLargeError")) {
+    return res.status(413).json({
+      success: false,
+      error: "The uploaded payload is too large. Please upload an image with a smaller resolution or file size."
+    });
+  }
+  next(err);
+});
 
 const PORT = 3000;
 
